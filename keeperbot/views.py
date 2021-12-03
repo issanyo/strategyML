@@ -7,6 +7,7 @@ import pandas as pd
 from datetime import datetime
 import json
 import numpy as np
+from keeperbot.utils import getContractAbi
 
 
 env = environ.Env()
@@ -51,29 +52,35 @@ def index(request):
 
 def fetch(request):
     WEB3_INFURA_KEY = env('WEB3_INFURA_KEY')
-    fObj = open('./keeperbot/AlphaVaultABI.json',)
-    AlphaVaultABI = json.load(fObj)['abi']
+    abi = getContractAbi()
 
     web3 = Web3(Web3.HTTPProvider('https://ropsten.infura.io/v3/' + WEB3_INFURA_KEY))
-    vault = web3.eth.contract('0x130c973Bbe11CBc5BAE094a45710CDE4Bebb8438', abi=AlphaVaultABI)
-    print(vault.address)
+    vault = web3.eth.contract('0x624633fD2Eff00cBFC7294CABD80303b12C5fD9d', abi=abi['AlphaVault'])
+    strategy = web3.eth.contract('0x4Bb99cfEe541C66a79D4DaeB4431BCfe8de1d410', abi=abi['DynamicRangesStrategy'])
 
     total0, total1 = vault.functions.getTotalAmounts().call()
-
-    print(total0)
-    print(total1)
 
     baseLower = vault.functions.baseLower().call()
     baseUpper = vault.functions.baseUpper().call()
 
-    print(baseLower)
-    print(baseUpper)
-    
-    limitLower = vault.functions.limitLower().call()
     limitUpper = vault.functions.limitUpper().call()
+    limitLower = vault.functions.limitLower().call()
+        
+    outstandingShares = vault.functions.totalSupply().call()
+    
+    tick = strategy.functions.getTick().call()
+    
 
-    print(limitLower)
-    print(limitUpper)
+    token0 = web3.eth.contract(vault.functions.token0().call(), abi=abi['MockToken'])
+    token1 = web3.eth.contract(vault.functions.token1().call(), abi=abi['MockToken'])
 
+    decimals_token_0 = token0.functions.decimals().call()
+    decimals_token_1 = token1.functions.decimals().call()
 
-    return HttpResponse('Vault address is ' + vault.address)
+    price = 1.001 ** tick * 10 ** (decimals_token_0 - decimals_token_1)
+
+    tvl = price * total1
+    
+
+    return HttpResponse('total0: ' + str(total0) + '\n' + 'total1: ' + str(total1) + '\n' + 'baseLower is ' + str(baseLower) + '\n' + 'baseUpper is ' + str(baseUpper) + '\n' + 'limitUpper is ' + str(limitUpper) + '\n' + 'limitLower is ' + str(limitLower) + '\n' + 'outstanding shares is ' + str(outstandingShares) + '\n' + 'tick is ' + str(tick) + '\n' + 'price is ' + str(price) + '\n' + 'tvl is ' + str(tvl) + '\n')
+
