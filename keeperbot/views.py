@@ -51,7 +51,7 @@ def index(request):
     return HttpResponse('Transaction sent by ' + keeper + ' to ' + receiverAccount + ' with value ' + str(transaction['value']) + '.\n Previous balance was ' + str(balance) + ', current balance is ' + str(newBalance) + '.\n')
 
 
-def fetch(request):
+def fetch():
     WEB3_INFURA_KEY = env('WEB3_INFURA_KEY')
     abi = getContractAbi()
 
