@@ -5,7 +5,7 @@ name: Deploy Arbitrum Rinkeby Testnet
 
 on:
   push:
-    branches: [ main ]
+    branches: [ BD-135/CreateCronAndPipeline ]
 
 jobs:
   build:
