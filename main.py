@@ -1,22 +1,20 @@
-from django.http import HttpResponse
-from django.http.response import JsonResponse
 from web3 import Web3
-import environ
+
 import binascii
 import requests
 from datetime import datetime
 import json
 import numpy as np
-from keeperbot.utils import getContractAbi
-from .models import Data
+from utils import getContractAbi, connectDB
+import os
+import psycopg2
 
 
-env = environ.Env()
-environ.Env.read_env()
 
-def index(request):
-    pk = env('PK')
-    WEB3_INFURA_KEY = env('WEB3_INFURA_KEY')
+
+def test_transaction():
+    pk = '6000e057971f9f094145f7f5a088b6a277eb904ec77288ec873aedca9fafcb7f'
+    WEB3_INFURA_KEY = 'cf01a35558ad4215aebc2042577b2f23'
     web3 = Web3(Web3.HTTPProvider('https://ropsten.infura.io/v3/' + WEB3_INFURA_KEY))
     balance = web3.eth.get_balance('0xffa9FDa3050007645945e38E72B5a3dB1414A59b')
 
@@ -48,12 +46,11 @@ def index(request):
     newBalance = web3.eth.get_balance(keeper)
     print(newBalance)
 
-    return HttpResponse('Transaction sent by ' + keeper + ' to ' + receiverAccount + ' with value ' + str(transaction['value']) + '.\n Previous balance was ' + str(balance) + ', current balance is ' + str(newBalance) + '.\n')
-
 
 def fetch():
-    WEB3_INFURA_KEY = env('WEB3_INFURA_KEY')
+    WEB3_INFURA_KEY = 'cf01a35558ad4215aebc2042577b2f23'
     abi = getContractAbi()
+    con = connectDB()
 
     web3 = Web3(Web3.HTTPProvider('https://ropsten.infura.io/v3/' + WEB3_INFURA_KEY))
     vault = web3.eth.contract('0x624633fD2Eff00cBFC7294CABD80303b12C5fD9d', abi=abi['AlphaVault'])
@@ -81,30 +78,14 @@ def fetch():
     price = 1.001 ** tick * 10 ** (decimals_token_0 - decimals_token_1)
 
     tvl = price * total1
+    timestamp = datetime.now()
 
-    data_instance = Data(
-        token0_quantity = total0,
-        token1_quantity = total1,
-        baseLower = baseLower,
-        baseUpper = baseUpper,
-        limitLower = limitLower,
-        limitUpper = limitUpper,
-        totalSupply = outstandingShares,
-        priceStrategy = price,
-        tvl = tvl,
-        pool_address = '0x624633fD2Eff00cBFC7294CABD80303b12C5fD9d',
-        strategy_address = '0x4Bb99cfEe541C66a79D4DaeB4431BCfe8de1d410'
-    )
+    print('total0: ' + str(total0) + '\n' + 'total1: ' + str(total1) + '\n' + 'baseLower is ' + str(baseLower) + '\n' + 'baseUpper is ' + str(baseUpper) + '\n' + 'limitUpper is ' + str(limitUpper) + '\n' + 'limitLower is ' + str(limitLower) + '\n' + 'outstanding shares is ' + str(outstandingShares) + '\n' + 'tick is ' + str(tick) + '\n' + 'price is ' + str(price) + '\n' + 'tvl is ' + str(tvl) + '\n')
 
-    print(data_instance.token0_quantity)
-    print(data_instance.token1_quantity)
-    print(data_instance.totalSupply)
-
-    try:
-        data_instance.save()
-    except Exception as e:
-        print(e)
+    cur = con.cursor()
     
-    return HttpResponse('Data fetched and loaded to database.')
-    #return HttpResponse('total0: ' + str(total0) + '\n' + 'total1: ' + str(total1) + '\n' + 'baseLower is ' + str(baseLower) + '\n' + 'baseUpper is ' + str(baseUpper) + '\n' + 'limitUpper is ' + str(limitUpper) + '\n' + 'limitLower is ' + str(limitLower) + '\n' + 'outstanding shares is ' + str(outstandingShares) + '\n' + 'tick is ' + str(tick) + '\n' + 'price is ' + str(price) + '\n' + 'tvl is ' + str(tvl) + '\n')
+    cur.execute("""INSERT INTO keeperbot_data (token0_quantity, token1_quantity, baseLower, baseUpper, limitUpper, limitLower, totalSupply, priceStrategy, tvl, pool_address, strategy_address, timestamp) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""", (total0, total1, baseLower, baseUpper, limitUpper, limitLower, outstandingShares, price, tvl, '0x624633fD2Eff00cBFC7294CABD80303b12C5fD9d', '0x4Bb99cfEe541C66a79D4DaeB4431BCfe8de1d410', timestamp))
 
+
+
+fetch()
