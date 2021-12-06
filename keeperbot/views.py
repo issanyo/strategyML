@@ -1,13 +1,14 @@
 from django.http import HttpResponse
+from django.http.response import JsonResponse
 from web3 import Web3
 import environ
 import binascii
 import requests
-import pandas as pd
 from datetime import datetime
 import json
 import numpy as np
 from keeperbot.utils import getContractAbi
+from .models import Data
 
 
 env = environ.Env()
@@ -80,7 +81,30 @@ def fetch(request):
     price = 1.001 ** tick * 10 ** (decimals_token_0 - decimals_token_1)
 
     tvl = price * total1
-    
 
-    return HttpResponse('total0: ' + str(total0) + '\n' + 'total1: ' + str(total1) + '\n' + 'baseLower is ' + str(baseLower) + '\n' + 'baseUpper is ' + str(baseUpper) + '\n' + 'limitUpper is ' + str(limitUpper) + '\n' + 'limitLower is ' + str(limitLower) + '\n' + 'outstanding shares is ' + str(outstandingShares) + '\n' + 'tick is ' + str(tick) + '\n' + 'price is ' + str(price) + '\n' + 'tvl is ' + str(tvl) + '\n')
+    data_instance = Data(
+        token0_quantity = total0,
+        token1_quantity = total1,
+        baseLower = baseLower,
+        baseUpper = baseUpper,
+        limitLower = limitLower,
+        limitUpper = limitUpper,
+        totalSupply = outstandingShares,
+        priceStrategy = price,
+        tvl = tvl,
+        pool_address = '0x624633fD2Eff00cBFC7294CABD80303b12C5fD9d',
+        strategy_address = '0x4Bb99cfEe541C66a79D4DaeB4431BCfe8de1d410'
+    )
+
+    print(data_instance.token0_quantity)
+    print(data_instance.token1_quantity)
+    print(data_instance.totalSupply)
+
+    try:
+        data_instance.save()
+    except Exception as e:
+        print(e)
+    
+    return HttpResponse('Data fetched and loaded to database.')
+    #return HttpResponse('total0: ' + str(total0) + '\n' + 'total1: ' + str(total1) + '\n' + 'baseLower is ' + str(baseLower) + '\n' + 'baseUpper is ' + str(baseUpper) + '\n' + 'limitUpper is ' + str(limitUpper) + '\n' + 'limitLower is ' + str(limitLower) + '\n' + 'outstanding shares is ' + str(outstandingShares) + '\n' + 'tick is ' + str(tick) + '\n' + 'price is ' + str(price) + '\n' + 'tvl is ' + str(tvl) + '\n')
 
