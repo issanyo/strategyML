@@ -1,5 +1,5 @@
 # .github/workflows/scheduled-builds.yml
-name: Trigger Site Rebuild on a CRON Schedule
+name: Trigger data fetchin from contract on a CRON Schedule
 
 on:
   schedule:
