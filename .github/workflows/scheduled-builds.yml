@@ -11,4 +11,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Fetch data from contracts
-        run: python manage.py read-contract
+        run: python main.py
