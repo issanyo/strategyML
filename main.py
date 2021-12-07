@@ -8,8 +8,8 @@ import numpy as np
 from utils import getContractAbi, connectDB
 import os
 import psycopg2
-
-
+import pandas as pd
+import numpy as np
 
 
 def test_transaction():
@@ -96,4 +96,72 @@ def fetch():
     con.close()
 
 
-fetch()
+#fetch()
+
+
+
+"""
+
+    Fetching historical data from the graph
+
+    0xCBCdF9626bC03E24f779434178A73a0B4bad62eD
+
+    as the bitcoin / eth address
+
+"""
+
+def fetch_thegraph_data():
+
+    pool_starting_date = "2021-05-04 00:00:00"
+
+    starting_pool = datetime.fromisoformat(pool_starting_date)
+    days_timedelta = datetime.today() - starting_pool
+    days = days_timedelta.days
+
+    query = """
+            {
+                pool(id: "0xcbcdf9626bc03e24f779434178a73a0b4bad62ed")
+                    {
+                    poolDayData (first : """+ str(days) + """) {
+                    id
+                    date
+                    tvlUSD
+                    feesUSD
+                    open
+                    high
+                    low
+                    close
+                    volumeUSD
+                    liquidity
+                    sqrtPrice
+                    token0Price
+                    token1Price
+                    volumeToken0
+                    volumeToken1
+                    txCount
+                    }
+                }
+            }
+            """
+
+    print('request to the graph')
+    request = requests.post('https://gateway.thegraph.com/api/6de22021c61c1ccc2002599b5750c305/subgraphs/id/0x9bde7bf4d5b13ef94373ced7c8ee0be59735a298-2'
+                                    '', json={'query': query})
+
+    print(request.json())
+
+    data_dct = request.json()['data']['pool']['poolDayData']
+
+    data_df = pd.DataFrame(data_dct)
+
+    data_df["date"] = pd.to_datetime(data_df["date"], unit = "s")
+
+    data_df[[col for col in data_df.columns if col not in ("date","id")]] = data_df[[col for col in data_df.columns if col not in ("date","id")]].astype(float)
+
+    data_df[["pct_change_close"]] = data_df[["close"]].pct_change(periods = 1)
+
+    data_df.replace([np.inf, -np.inf], np.nan, inplace=True)
+
+    data_df[["pct_change_close"]].hist()
+
+fetch_thegraph_data()
