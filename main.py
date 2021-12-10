@@ -10,6 +10,7 @@ import os
 import psycopg2
 import pandas as pd
 import numpy as np
+import matplotlib
 
 
 def test_transaction():
@@ -51,6 +52,8 @@ def fetch():
     WEB3_INFURA_KEY = 'cf01a35558ad4215aebc2042577b2f23'
     abi = getContractAbi()
     con = connectDB()
+    theGraphData = fetch_thegraph_data()
+
 
     web3 = Web3(Web3.HTTPProvider('https://ropsten.infura.io/v3/' + WEB3_INFURA_KEY))
     vault = web3.eth.contract('0x624633fD2Eff00cBFC7294CABD80303b12C5fD9d', abi=abi['AlphaVault'])
@@ -85,7 +88,7 @@ def fetch():
     cur = con.cursor()
     
     try:
-        cur.execute("INSERT INTO keeperbot_data (token0_quantity, token1_quantity, \"baseLower\", \"baseUpper\", \"limitUpper\", \"limitLower\", \"totalSupply\", \"priceStrategy\", tvl, pool_address, strategy_address, timestamp) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (total0, total1, baseLower, baseUpper, limitUpper, limitLower, outstandingShares, price, tvl, '0x624633fD2Eff00cBFC7294CABD80303b12C5fD9d', '0x4Bb99cfEe541C66a79D4DaeB4431BCfe8de1d410', timestamp))
+        cur.execute("INSERT INTO keeperbot_data (token0_quantity, token1_quantity, \"baseLower\", \"baseUpper\", \"limitUpper\", \"limitLower\", \"totalSupply\", \"priceStrategy\", tvl, pool_address, strategy_address, timestamp, price_graph, volume, liquidity, fees_pool) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (total0, total1, baseLower, baseUpper, limitUpper, limitLower, outstandingShares, price, tvl, '0x624633fD2Eff00cBFC7294CABD80303b12C5fD9d', '0x4Bb99cfEe541C66a79D4DaeB4431BCfe8de1d410', timestamp, theGraphData['priceGraph'], theGraphData['volume'], theGraphData['liquidity'], theGraphData['fees_pool']))
         con.commit()
         print('Data successfully inserted')
     except psycopg2.Error as e:
@@ -117,6 +120,7 @@ def fetch_thegraph_data():
     starting_pool = datetime.fromisoformat(pool_starting_date)
     days_timedelta = datetime.today() - starting_pool
     days = days_timedelta.days
+    print(days)
 
     query = """
             {
@@ -148,11 +152,12 @@ def fetch_thegraph_data():
     request = requests.post('https://gateway.thegraph.com/api/6de22021c61c1ccc2002599b5750c305/subgraphs/id/0x9bde7bf4d5b13ef94373ced7c8ee0be59735a298-2'
                                     '', json={'query': query})
 
-    print(request.json())
 
     data_dct = request.json()['data']['pool']['poolDayData']
 
     data_df = pd.DataFrame(data_dct)
+    print(data_df.tail(1))
+
 
     data_df["date"] = pd.to_datetime(data_df["date"], unit = "s")
 
@@ -163,5 +168,18 @@ def fetch_thegraph_data():
     data_df.replace([np.inf, -np.inf], np.nan, inplace=True)
 
     data_df[["pct_change_close"]].hist()
+    lastRow = data_df.iloc[-1]
 
-fetch_thegraph_data()
+    print(lastRow['close'])
+ 
+
+    finalDataDict = {
+        'priceGraph': lastRow['close'],
+        'volume': lastRow['volumeUSD'],
+        'liquidity': lastRow['liquidity'],
+        'fees_pool': lastRow['feesUSD'],
+    }
+
+    return finalDataDict
+
+fetch()
