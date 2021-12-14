@@ -1,16 +1,21 @@
+from pandas.core import base
 from web3 import Web3
 
 import binascii
 import requests
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 import numpy as np
-from utils import getContractAbi, connectDB
+from utils import get_contract_abi, connect_db
 import os
 import psycopg2
 import pandas as pd
+import math
+import time
 import numpy as np
 import matplotlib
+
+keeper = '0xffa9FDa3050007645945e38E72B5a3dB1414A59b'
 
 
 def test_transaction():
@@ -21,7 +26,6 @@ def test_transaction():
 
     print(balance)
     receiverAccount = '0xaaB5a17c0d9d09632F013d8b5E2353A77710dDc1'
-    keeper = '0xffa9FDa3050007645945e38E72B5a3dB1414A59b'
 
     nonce = web3.eth.getTransactionCount(keeper)
 
@@ -50,14 +54,29 @@ def test_transaction():
 
 def fetch():
     WEB3_INFURA_KEY = 'cf01a35558ad4215aebc2042577b2f23'
-    abi = getContractAbi()
-    con = connectDB()
-    theGraphData = fetch_thegraph_data()
-
+    abi = get_contract_abi()
+    con = connect_db()
 
     web3 = Web3(Web3.HTTPProvider('https://ropsten.infura.io/v3/' + WEB3_INFURA_KEY))
-    vault = web3.eth.contract('0x624633fD2Eff00cBFC7294CABD80303b12C5fD9d', abi=abi['AlphaVault'])
-    strategy = web3.eth.contract('0x4Bb99cfEe541C66a79D4DaeB4431BCfe8de1d410', abi=abi['DynamicRangesStrategy'])
+    vault = web3.eth.contract('0x3047B2b49f104F38f3b3f1AC9b8Df1C62726251E', abi=abi['AlphaVault'])
+    strategy = web3.eth.contract('0xa5EeD50E39daFF57F5b7480dF6E65391C44eF49C', abi=abi['DynamicRangesStrategy'])
+
+    theGraphData = fetch_thegraph_data(strategy)
+
+    cur = con.cursor()
+
+    last_rebalance = get_last_rebalance(cur)
+    timestamp = datetime.now()
+
+    try:
+        if timestamp - last_rebalance > timedelta(hours=48):
+            rebalance(theGraphData['limit_lower'], theGraphData['base_lower'], strategy)
+            last_rebalance = timestamp
+            rebalance_check = True
+        else:
+            rebalance_check = False
+    except Exception as e:
+        print(e)
 
     total0, total1 = vault.functions.getTotalAmounts().call()
 
@@ -71,7 +90,6 @@ def fetch():
     
     tick = strategy.functions.getTick().call()
     
-
     token0 = web3.eth.contract(vault.functions.token0().call(), abi=abi['MockToken'])
     token1 = web3.eth.contract(vault.functions.token1().call(), abi=abi['MockToken'])
 
@@ -81,52 +99,32 @@ def fetch():
     price = 1.001 ** tick * 10 ** (decimals_token_0 - decimals_token_1)
 
     tvl = price * total1
-    timestamp = datetime.now()
-
     print('total0: ' + str(total0) + '\n' + 'total1: ' + str(total1) + '\n' + 'baseLower is ' + str(baseLower) + '\n' + 'baseUpper is ' + str(baseUpper) + '\n' + 'limitUpper is ' + str(limitUpper) + '\n' + 'limitLower is ' + str(limitLower) + '\n' + 'outstanding shares is ' + str(outstandingShares) + '\n' + 'tick is ' + str(tick) + '\n' + 'price is ' + str(price) + '\n' + 'tvl is ' + str(tvl) + '\n')
 
-    cur = con.cursor()
     
     try:
-        cur.execute("INSERT INTO keeperbot_data (token0_quantity, token1_quantity, \"baseLower\", \"baseUpper\", \"limitUpper\", \"limitLower\", \"totalSupply\", \"priceStrategy\", tvl, pool_address, strategy_address, timestamp, price_graph, volume, liquidity, fees_pool) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (total0, total1, baseLower, baseUpper, limitUpper, limitLower, outstandingShares, price, tvl, '0x624633fD2Eff00cBFC7294CABD80303b12C5fD9d', '0x4Bb99cfEe541C66a79D4DaeB4431BCfe8de1d410', timestamp, theGraphData['priceGraph'], theGraphData['volume'], theGraphData['liquidity'], theGraphData['fees_pool']))
+        cur.execute("INSERT INTO keeperbot_data (token0_quantity, token1_quantity, \"baseLower\", \"baseUpper\", \"limitUpper\", \"limitLower\", \"totalSupply\", \"priceStrategy\", tvl, pool_address, strategy_address, timestamp, price_graph, volume, liquidity, fees_pool, rebalance_check, rebalance_timestamp) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (total0, total1, baseLower, baseUpper, limitUpper, limitLower, outstandingShares, price, tvl, '0x624633fD2Eff00cBFC7294CABD80303b12C5fD9d', '0x4Bb99cfEe541C66a79D4DaeB4431BCfe8de1d410', timestamp, theGraphData['priceGraph'], theGraphData['volume'], theGraphData['liquidity'], theGraphData['fees_pool'], rebalance_check, last_rebalance))
         con.commit()
         print('Data successfully inserted')
     except psycopg2.Error as e:
         print(e)
         con.rollback()
 
-
     con.close()
 
 
-#fetch()
+def fetch_thegraph_data(strategy):
 
-
-
-"""
-
-    Fetching historical data from the graph
-
-    0xCBCdF9626bC03E24f779434178A73a0B4bad62eD
-
-    as the bitcoin / eth address
-
-"""
-
-def fetch_thegraph_data():
-
-    pool_starting_date = "2021-05-04 00:00:00"
-
-    starting_pool = datetime.fromisoformat(pool_starting_date)
-    days_timedelta = datetime.today() - starting_pool
-    days = days_timedelta.days
-    print(days)
-
+    days = 30
+    #get unix timestamp 30 days ago
+    timestamp = int(time.time()) - (days * 24 * 60 * 60)      
+    
+   
     query = """
             {
-                pool(id: "0xcbcdf9626bc03e24f779434178a73a0b4bad62ed")
+                pool(id: "0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640")
                     {
-                    poolDayData (first : """+ str(days) + """) {
+                    poolDayData (where: { date_gte : """ + str(timestamp) + """} ) {
                     id
                     date
                     tvlUSD
@@ -149,15 +147,13 @@ def fetch_thegraph_data():
             """
 
     print('request to the graph')
-    request = requests.post('https://gateway.thegraph.com/api/6de22021c61c1ccc2002599b5750c305/subgraphs/id/0x9bde7bf4d5b13ef94373ced7c8ee0be59735a298-2'
+    request = requests.post('https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3'
                                     '', json={'query': query})
 
-
+    print(request.json())
     data_dct = request.json()['data']['pool']['poolDayData']
 
     data_df = pd.DataFrame(data_dct)
-    print(data_df.tail(1))
-
 
     data_df["date"] = pd.to_datetime(data_df["date"], unit = "s")
 
@@ -168,18 +164,70 @@ def fetch_thegraph_data():
     data_df.replace([np.inf, -np.inf], np.nan, inplace=True)
 
     data_df[["pct_change_close"]].hist()
-    lastRow = data_df.iloc[-1]
+    last_row = data_df.iloc[-1]
+    
+    std_deviation = data_df[["pct_change_close"]].std().iloc[-1]
 
-    print(lastRow['close'])
- 
 
-    finalDataDict = {
-        'priceGraph': lastRow['close'],
-        'volume': lastRow['volumeUSD'],
-        'liquidity': lastRow['liquidity'],
-        'fees_pool': lastRow['feesUSD'],
+    base_lower_price = (1 - std_deviation) * data_df[['close']].iloc[-1]
+    limit_lower_price = (1 - std_deviation * 0.25) * data_df[['close']].iloc[-1] 
+
+    print('base_lower_price is ' + str(base_lower_price))
+    print('limit_lower_price is ' + str(limit_lower_price))
+
+    base_lower_tick = math.log(base_lower_price * 10e12, 1.0001) 
+    limit_lower_tick = math.log(limit_lower_price * 10e12, 1.0001) 
+
+    print('base_lower_tick is ' + str(base_lower_tick))
+    print('limit_lower_tick is ' + str(limit_lower_tick))
+
+    tick_spacing = strategy.functions.tickSpacing().call()
+    print('tick_spacing is: ' + str(tick_spacing))
+
+    base_lower = int(math.ceil(int(base_lower_tick) / tick_spacing)) * tick_spacing
+    limit_lower = int(math.ceil(int(limit_lower_tick) / tick_spacing)) * tick_spacing
+
+    print(base_lower)
+    print(limit_lower)
+
+    final_data_dict = {
+        'priceGraph': last_row['close'],
+        'volume': last_row['volumeUSD'],
+        'liquidity': last_row['liquidity'],
+        'fees_pool': last_row['feesUSD'],
+        'limit_lower': limit_lower,
+        'base_lower': base_lower,
     }
 
-    return finalDataDict
+    return final_data_dict
+
+def rebalance(limit_lower, base_lower, strategy):
+    print('Rebalancing')
+
+    try:
+        print(strategy.functions.tickSpacing().call())
+        strategy.functions.setBaseThreshold(base_lower).call({ 'from': keeper })
+        strategy.functions.setLimitThreshold(limit_lower).call({ 'from': keeper })
+        strategy.functions.rebalance().call({ 'from': keeper })
+        print('Rebalance successful')
+    except Exception as e:
+        print(e)
+        print('Rebalance failed')
+    return
+    
+
+
+def get_last_rebalance(cur):
+    try:
+        cur.execute("SELECT rebalance_timestamp FROM keeperbot_data WHERE rebalance_timestamp IS NOT NULL ORDER BY timestamp DESC LIMIT 1")
+        last_rebalance = cur.fetchone()[0]
+
+        last_rebalance = last_rebalance.replace(tzinfo=None)
+    except Exception as e:
+        print(e)
+        last_rebalance = None
+
+    return last_rebalance
+
 
 fetch()

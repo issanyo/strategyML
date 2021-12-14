@@ -3,7 +3,7 @@
 import json
 import psycopg2
 
-def getContractAbi():
+def get_contract_abi():
     fObj = open('./AlphaVault.json',)
     AlphaVault = json.load(fObj)['abi']
     fObj = open('./DynamicRangesStrategy.json')
@@ -19,7 +19,7 @@ def getContractAbi():
 
     return abi
 
-def connectDB():
+def connect_db():
     con = psycopg2.connect(
         host='ec2-176-34-105-15.eu-west-1.compute.amazonaws.com',
         database='d25a74696pv5g',
