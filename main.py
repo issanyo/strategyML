@@ -16,10 +16,10 @@ import numpy as np
 import matplotlib
 
 keeper = '0xffa9FDa3050007645945e38E72B5a3dB1414A59b'
+pk = '6000e057971f9f094145f7f5a088b6a277eb904ec77288ec873aedca9fafcb7f'
 
 
 def test_transaction():
-    pk = '6000e057971f9f094145f7f5a088b6a277eb904ec77288ec873aedca9fafcb7f'
     WEB3_INFURA_KEY = 'cf01a35558ad4215aebc2042577b2f23'
     web3 = Web3(Web3.HTTPProvider('https://ropsten.infura.io/v3/' + WEB3_INFURA_KEY))
     balance = web3.eth.get_balance('0xffa9FDa3050007645945e38E72B5a3dB1414A59b')
@@ -69,8 +69,8 @@ def fetch():
     timestamp = datetime.now()
 
     try:
-        if timestamp - last_rebalance > timedelta(hours=48):
-            rebalance(theGraphData['limit_lower'], theGraphData['base_lower'], strategy)
+        if timestamp - last_rebalance < timedelta(hours=48):
+            rebalance(theGraphData['limit_lower'], theGraphData['base_lower'], strategy, web3)
             last_rebalance = timestamp
             rebalance_check = True
         else:
@@ -201,20 +201,60 @@ def fetch_thegraph_data(strategy):
 
     return final_data_dict
 
-def rebalance(limit_lower, base_lower, strategy):
+
+def rebalance(limit_lower, base_lower, strategy, web3):
     print('Rebalancing')
 
     try:
-        print(strategy.functions.tickSpacing().call())
-        strategy.functions.setBaseThreshold(base_lower).call({ 'from': keeper })
-        strategy.functions.setLimitThreshold(limit_lower).call({ 'from': keeper })
-        strategy.functions.rebalance().call({ 'from': keeper })
+
+        gas_price = web3.eth.generate_gas_price()
+        print('gas_price is: ' + str(gas_price))
+        print('setBaseThreshold')
+        nonce = web3.eth.getTransactionCount(keeper)
+        tx = strategy.functions.setBaseThreshold(base_lower).buildTransaction(
+        {
+            'value': 0,
+            'gas': 2000000,
+            'chainId': 3,
+            'gasPrice': 20000000000,
+            'nonce': nonce
+        })
+        signed_tx = web3.eth.account.sign_transaction(tx, private_key = pk)
+        web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+
+        print('setLimitThreshold')
+        nonce = web3.eth.getTransactionCount(keeper)
+        tx = strategy.functions.setLimitThreshold(limit_lower).buildTransaction(
+        {
+            'value': 0,
+            'gas': 2000000,
+            'chainId': 3,
+            'gasPrice': 200000000000,
+            'nonce': nonce
+        })
+        signed_tx = web3.eth.account.sign_transaction(tx, private_key = pk)
+        web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+
+        print('rebalance tx')
+        nonce = web3.eth.getTransactionCount(keeper)
+        tx = strategy.functions.rebalance().buildTransaction(
+        {
+            'value': 0,
+            'gas': 2000000,
+            'chainId': 3,
+            'gasPrice': 2000000000000,
+            'nonce': nonce
+        })
+        signed_tx = web3.eth.account.sign_transaction(tx, private_key = pk)
+        web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+
         print('Rebalance successful')
     except Exception as e:
         print(e)
         print('Rebalance failed')
     return
     
+
 
 
 def get_last_rebalance(cur):
