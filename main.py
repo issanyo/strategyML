@@ -17,13 +17,12 @@ import numpy as np
 import matplotlib
 
 keeper = '0xffa9FDa3050007645945e38E72B5a3dB1414A59b'
-pk = '6000e057971f9f094145f7f5a088b6a277eb904ec77288ec873aedca9fafcb7f'
 
 
 def test_transaction():
     WEB3_INFURA_KEY = 'cf01a35558ad4215aebc2042577b2f23'
     web3 = Web3(Web3.HTTPProvider('https://ropsten.infura.io/v3/' + WEB3_INFURA_KEY))
-    balance = web3.eth.get_balance('0xffa9FDa3050007645945e38E72B5a3dB1414A59b')
+    balance = web3.eth.get_balance(keeper)
 
     print(balance)
     receiverAccount = '0xaaB5a17c0d9d09632F013d8b5E2353A77710dDc1'
@@ -75,7 +74,7 @@ def fetch():
     timestamp = datetime.now()
 
     try:
-        if timestamp - last_rebalance < timedelta(hours=48):
+        if timestamp - last_rebalance > timedelta(hours=48):
             rebalance(theGraphData['limit_lower'], theGraphData['base_lower'], strategy, web3)
             last_rebalance = timestamp
             rebalance_check = True
@@ -168,41 +167,48 @@ def fetch_thegraph_data(strategy):
     data_df[["pct_change_close"]] = data_df[["close"]].pct_change(periods = 1)
 
     data_df.replace([np.inf, -np.inf], np.nan, inplace=True)
-
-    data_df[["pct_change_close"]].hist()
     last_row = data_df.iloc[-1]
     
     std_deviation = data_df[["pct_change_close"]].std().iloc[-1]
-
-
-    base_lower_price = (1 - std_deviation) * data_df[['close']].iloc[-1]
-    limit_lower_price = (1 - std_deviation * 0.25) * data_df[['close']].iloc[-1] 
-
-    print('base_lower_price is ' + str(base_lower_price))
-    print('limit_lower_price is ' + str(limit_lower_price))
-
-    base_lower_tick = math.log(base_lower_price * 10e12, 1.0001) 
-    limit_lower_tick = math.log(limit_lower_price * 10e12, 1.0001) 
-
-    print('base_lower_tick is ' + str(base_lower_tick))
-    print('limit_lower_tick is ' + str(limit_lower_tick))
+    print("std deviation is " + str(std_deviation))
 
     tick_spacing = strategy.functions.tickSpacing().call()
     print('tick_spacing is: ' + str(tick_spacing))
+    tick = strategy.functions.getTick().call()
+    print('tick is: ' + str(tick))
+    print(str(1.0001 ** tick))
 
-    base_lower = int(math.ceil(int(base_lower_tick) / tick_spacing)) * tick_spacing
-    limit_lower = int(math.ceil(int(limit_lower_tick) / tick_spacing)) * tick_spacing
+    base_lower_price = (1 - std_deviation) * data_df[['close']].iloc[-1]
+    limit_lower_price = (1 - std_deviation * 0.25) * data_df[['close']].iloc[-1]
 
-    print(base_lower)
-    print(limit_lower)
+    print('data df close is: ' + str(data_df[['close']].iloc[-1]))
+    print('base_lower_price is ' + str(base_lower_price))
+    print('limit_lower_price is ' + str(limit_lower_price))
+
+    price_tick = math.log(1/data_df[['close']].iloc[-1] * 10e12, 1.0001)
+    base_lower_tick = math.log(1/base_lower_price * 10e12, 1.0001)
+    limit_lower_tick = math.log(1/limit_lower_price * 10e12, 1.0001)
+
+    print('tick is ' + str(price_tick))
+    print('base_lower_tick is ' + str(base_lower_tick))
+    print('limit_lower_tick is ' + str(limit_lower_tick))
+    base_width =  base_lower_tick - price_tick
+    limit_width = limit_lower_tick - price_tick
+
+
+    base_width = int(math.ceil(int(base_width) / tick_spacing)) * tick_spacing
+    limit_width = int(math.ceil(int(limit_width) / tick_spacing)) * tick_spacing
+
+    print('base_width is ' + str(base_width))
+    print('limit_width is ' + str(limit_width))
 
     final_data_dict = {
         'priceGraph': last_row['close'],
         'volume': last_row['volumeUSD'],
         'liquidity': last_row['liquidity'],
         'fees_pool': last_row['feesUSD'],
-        'limit_lower': limit_lower,
-        'base_lower': base_lower,
+        'limit_lower': limit_width,
+        'base_lower': base_width,
     }
 
     return final_data_dict
@@ -213,8 +219,6 @@ def rebalance(limit_lower, base_lower, strategy, web3):
 
     try:
 
-        gas_price = web3.eth.generate_gas_price()
-        print('gas_price is: ' + str(gas_price))
         print('setBaseThreshold')
         nonce = web3.eth.getTransactionCount(keeper)
         tx = strategy.functions.setBaseThreshold(base_lower).buildTransaction(
