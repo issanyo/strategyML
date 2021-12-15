@@ -1,5 +1,6 @@
 from pandas.core import base
-from web3 import Web3
+from web3 import Web3, middleware
+from web3.gas_strategies.time_based import medium_gas_price_strategy
 
 import binascii
 import requests
@@ -58,6 +59,11 @@ def fetch():
     con = connect_db()
 
     web3 = Web3(Web3.HTTPProvider('https://ropsten.infura.io/v3/' + WEB3_INFURA_KEY))
+    web3.eth.set_gas_price_strategy(medium_gas_price_strategy)
+
+    web3.middleware_onion.add(middleware.time_based_cache_middleware)
+    web3.middleware_onion.add(middleware.latest_block_based_cache_middleware)
+    web3.middleware_onion.add(middleware.simple_cache_middleware)
     vault = web3.eth.contract('0x3047B2b49f104F38f3b3f1AC9b8Df1C62726251E', abi=abi['AlphaVault'])
     strategy = web3.eth.contract('0xa5EeD50E39daFF57F5b7480dF6E65391C44eF49C', abi=abi['DynamicRangesStrategy'])
 
@@ -216,11 +222,11 @@ def rebalance(limit_lower, base_lower, strategy, web3):
             'value': 0,
             'gas': 2000000,
             'chainId': 3,
-            'gasPrice': 20000000000,
             'nonce': nonce
         })
         signed_tx = web3.eth.account.sign_transaction(tx, private_key = pk)
-        web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+        tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+        tx_receipt = web3.eth.waitForTransactionReceipt(tx_hash)
 
         print('setLimitThreshold')
         nonce = web3.eth.getTransactionCount(keeper)
@@ -229,11 +235,11 @@ def rebalance(limit_lower, base_lower, strategy, web3):
             'value': 0,
             'gas': 2000000,
             'chainId': 3,
-            'gasPrice': 200000000000,
             'nonce': nonce
         })
         signed_tx = web3.eth.account.sign_transaction(tx, private_key = pk)
-        web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+        tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+        tx_receipt = web3.eth.waitForTransactionReceipt(tx_hash)
 
         print('rebalance tx')
         nonce = web3.eth.getTransactionCount(keeper)
@@ -242,11 +248,11 @@ def rebalance(limit_lower, base_lower, strategy, web3):
             'value': 0,
             'gas': 2000000,
             'chainId': 3,
-            'gasPrice': 2000000000000,
             'nonce': nonce
         })
         signed_tx = web3.eth.account.sign_transaction(tx, private_key = pk)
-        web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+        tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+        tx_receipt = web3.eth.waitForTransactionReceipt(tx_hash)
 
         print('Rebalance successful')
     except Exception as e:
