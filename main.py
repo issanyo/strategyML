@@ -17,11 +17,11 @@ import numpy as np
 import matplotlib
 
 keeper = '0xffa9FDa3050007645945e38E72B5a3dB1414A59b'
-
+pk = os.environ['PK']
+WEB3_INFURA_PROJECT_ID = os.environ['WEB3_INFURA_PROJECT_ID']
 
 def test_transaction():
-    WEB3_INFURA_KEY = 'cf01a35558ad4215aebc2042577b2f23'
-    web3 = Web3(Web3.HTTPProvider('https://ropsten.infura.io/v3/' + WEB3_INFURA_KEY))
+    web3 = Web3(Web3.HTTPProvider('https://ropsten.infura.io/v3/' + WEB3_INFURA_PROJECT_ID))
     balance = web3.eth.get_balance(keeper)
 
     print(balance)
@@ -53,11 +53,10 @@ def test_transaction():
 
 
 def fetch():
-    WEB3_INFURA_KEY = 'cf01a35558ad4215aebc2042577b2f23'
     abi = get_contract_abi()
     con = connect_db()
 
-    web3 = Web3(Web3.HTTPProvider('https://ropsten.infura.io/v3/' + WEB3_INFURA_KEY))
+    web3 = Web3(Web3.HTTPProvider('https://ropsten.infura.io/v3/' + WEB3_INFURA_PROJECT_ID))
     web3.eth.set_gas_price_strategy(medium_gas_price_strategy)
 
     web3.middleware_onion.add(middleware.time_based_cache_middleware)
