@@ -4,7 +4,7 @@ name: Trigger data fetching from contract on a CRON Schedule
 on:
   schedule:
     # Runs "at every 5 minutes" (see https://crontab.guru)
-    - cron: '*/5 * * * *'
+    - cron: '*/2 * * * *'
 jobs:
   build:
     name: Trigger keeper script
@@ -16,7 +16,7 @@ jobs:
           python-version: '3.8'
       - name: Current directory
         run: 
-          ls -l
+          pwd
       - name: Install dependencies
         run: |
           sudo apt-get install expect
