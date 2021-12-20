@@ -21,6 +21,10 @@ def get_contract_abi():
     return abi
 
 def connect_db():
+    print(os.environ['HOST'])
+    print(os.environ['DATABASE'])
+    print(os.environ['USER'])
+    print(os.environ['PASSWORD'])
     con = psycopg2.connect(
         host = os.environ['HOST'],
         database = os.environ['DATABASE'],
