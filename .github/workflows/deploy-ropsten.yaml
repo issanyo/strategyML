@@ -22,6 +22,7 @@ jobs:
         sudo apt-get install expect
         python -m pip install --upgrade pip
         pip install --user pipx
+        pip install -r requirements.txt
         pipx ensurepath
     - name: Get environment variables
       env:
