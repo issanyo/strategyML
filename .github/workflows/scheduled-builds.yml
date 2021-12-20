@@ -4,7 +4,7 @@ name: Trigger data fetching from contract on a CRON Schedule
 on:
   schedule:
     # Runs "at every 5 minutes" (see https://crontab.guru)
-    - cron: '*/5 * * * *'
+    - cron: '0 9/12 * * *'
 jobs:
   build:
     name: Trigger keeper script
