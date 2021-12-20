@@ -5,7 +5,7 @@ name: Deploy Ropsten
 
 on:
   push:
-    branches: [ BD-135/CreateCronAndPipeline ]
+    branches: [ BD-131/ReadFromTheGraph ]
 
 jobs:
   build:
