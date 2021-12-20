@@ -1,0 +1,14 @@
+# .github/workflows/scheduled-builds.yml
+name: Trigger data fetching from contract on a CRON Schedule
+
+on:
+  schedule:
+    # Runs "at every 5 minutes" (see https://crontab.guru)
+    - cron: '*/5 * * * *'
+jobs:
+  build:
+    name: Trigger keeper script
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch data from contracts
+        run: python main.py
