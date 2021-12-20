@@ -1,5 +1,5 @@
 # .github/workflows/scheduled-builds.yml
-name: Trigger data fetchin from contract on a CRON Schedule
+name: Trigger data fetching from contract on a CRON Schedule
 
 on:
   schedule:
@@ -7,7 +7,7 @@ on:
     - cron: '*/5 * * * *'
 jobs:
   build:
-    name: Trigger Site Rebuild
+    name: Trigger keeper script
     runs-on: ubuntu-latest
     steps:
       - name: Fetch data from contracts

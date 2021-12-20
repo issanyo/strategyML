@@ -22,10 +22,10 @@ def get_contract_abi():
 
 def connect_db():
     con = psycopg2.connect(
-        host='ec2-176-34-105-15.eu-west-1.compute.amazonaws.com',
-        database='d25a74696pv5g',
-        user='dhzryfbbhtkggy',
-        password='421f0dfd4f65c2795d568c277fd55de894fe1667c3bed9d849715f1548e5bba1'
+        host = os.environ['host'],
+        database = os.environ['database'],
+        user = os.environ['user'],
+        password = os.environ['password']
     )
 
     return con
