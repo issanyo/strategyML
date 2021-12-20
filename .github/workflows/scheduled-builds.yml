@@ -10,5 +10,23 @@ jobs:
     name: Trigger keeper script
     runs-on: ubuntu-latest
     steps:
-      - name: Fetch data from contracts
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+      - name: Install dependencies
+        run: |
+          sudo apt-get install expect
+          python -m pip install --upgrade pip
+          pip install --user pipx
+          pip install -r requirements.txt
+          pipx ensurepath
+      - name: Get env variable and fetch data from contracts
+        env:
+          WEB3_INFURA_PROJECT_ID: ${{ secrets.WEB3_INFURA_PROJECT_ID }}
+          PK: ${{ secrets.PK }}
+          HOST: ${{ secrets.HOST }}
+          DATABASE: ${{ secrets.DATABASE }}
+          USER: ${{ secrets.USER }}
+          PASSWORD: ${{ secrets.PASSWORD }}
         run: python main.py
