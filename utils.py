@@ -21,6 +21,7 @@ def get_contract_abi():
     return abi
 
 def connect_db():
+    print('Connecting to DB...')
     print(os.environ['HOST'])
     print(os.environ['DATABASE'])
     print(os.environ['USER'])
