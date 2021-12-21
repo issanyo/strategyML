@@ -4,13 +4,13 @@ from web3.gas_strategies.time_based import medium_gas_price_strategy
 
 from datetime import datetime, timedelta
 import os
-import psycopg2
 from utils import get_contract_abi, connect_db
 from vault import get_vault_data
 from the_graph_data import fetch_thegraph_data
 from strategy import rebalance
+from db import insert_data
 
-keeper = '0xffa9FDa3050007645945e38E72B5a3dB1414A59b'
+keeper = os.environ['KEEPER']
 pk = os.environ['PK']
 WEB3_INFURA_PROJECT_ID = os.environ['WEB3_INFURA_PROJECT_ID']
 
@@ -47,14 +47,7 @@ def fetch():
 
     vault_data = get_vault_data(vault, strategy, web3, abi)
 
-    
-    try:
-        cur.execute("INSERT INTO keeperbot_data (token0_quantity, token1_quantity, \"baseLower\", \"baseUpper\", \"limitUpper\", \"limitLower\", \"totalSupply\", \"priceStrategy\", tvl, pool_address, strategy_address, timestamp, price_graph, volume, liquidity, fees_pool, rebalance_check, rebalance_timestamp) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (vault_data['total0'], vault_data['total1'], vault_data['baseLower'], vault_data['baseUpper'], vault_data['limitUpper'], vault_data['limitLower'], vault_data['outstandingShares'], vault_data['price'], vault_data['tvl'], '0x624633fD2Eff00cBFC7294CABD80303b12C5fD9d', '0x4Bb99cfEe541C66a79D4DaeB4431BCfe8de1d410', timestamp, theGraphData['priceGraph'], theGraphData['volume'], theGraphData['liquidity'], theGraphData['fees_pool'], rebalance_check, last_rebalance))
-        con.commit()
-        print('Data successfully inserted')
-    except psycopg2.Error as e:
-        print(e)
-        con.rollback()
+    insert_data(cur, con, vault_data, theGraphData, timestamp, last_rebalance, rebalance_check)
 
     con.close()
 

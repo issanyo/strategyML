@@ -33,5 +33,6 @@ jobs:
           DATABASE: ${{ secrets.DATABASE }}
           USER: ${{ secrets.USER }}
           PASSWORD: ${{ secrets.PASSWORD }}
+          KEEPER: ${{ secrets.KEEPER }}
         run: 
           python main.py

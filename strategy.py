@@ -1,6 +1,6 @@
 import os
 
-keeper = '0xffa9FDa3050007645945e38E72B5a3dB1414A59b'
+keeper = os.environ['KEEPER']
 pk = os.environ['PK']
 
 
@@ -8,6 +8,8 @@ def rebalance(limit_lower, base_lower, strategy, web3):
     print('Rebalancing')
     print(pk)
     print(strategy.functions.keeper().call())
+    print(str(web3.eth.generate_gas_price()))
+
     try:
 
         print('setBaseThreshold')
@@ -16,7 +18,7 @@ def rebalance(limit_lower, base_lower, strategy, web3):
         {
             'value': 0,
             'chainId': 3,
-            'gas': 2000000,
+            'gas': web3.eth.generate_gas_price(),
             'nonce': nonce
         })
         signed_tx = web3.eth.account.sign_transaction(tx, private_key = pk)
@@ -29,6 +31,7 @@ def rebalance(limit_lower, base_lower, strategy, web3):
         {
             'value': 0,
             'chainId': 3,
+            'gas': web3.eth.generate_gas_price(),
             'nonce': nonce
         })
         signed_tx = web3.eth.account.sign_transaction(tx, private_key = pk)
@@ -41,6 +44,7 @@ def rebalance(limit_lower, base_lower, strategy, web3):
         {
             'value': 0,
             'chainId': 3,
+            'gas': web3.eth.generate_gas_price(),
             'nonce': nonce
         })
         signed_tx = web3.eth.account.sign_transaction(tx, private_key = pk)

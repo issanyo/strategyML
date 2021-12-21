@@ -2,7 +2,7 @@ import binascii
 from web3 import Web3
 import os
 
-keeper = '0xffa9FDa3050007645945e38E72B5a3dB1414A59b'
+keeper = os.environ['KEEPER']
 pk = os.environ['PK']
 WEB3_INFURA_PROJECT_ID = os.environ['WEB3_INFURA_PROJECT_ID']
 
