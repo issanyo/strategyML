@@ -8,7 +8,8 @@ def rebalance(limit_lower, base_lower, strategy, web3):
     print('Rebalancing')
     print(pk)
     print(strategy.functions.keeper().call())
-    print(str(web3.eth.generate_gas_price()))
+    print(str(web3.eth.generateGasPrice()))
+    print(web3.eth.getBlock("latest")['gasLimit'])
 
     try:
 
@@ -18,7 +19,7 @@ def rebalance(limit_lower, base_lower, strategy, web3):
         {
             'value': 0,
             'chainId': 3,
-            'gas': web3.eth.generate_gas_price(),
+            'gas': web3.eth.getBlock("latest")['gasLimit'],
             'nonce': nonce
         })
         signed_tx = web3.eth.account.sign_transaction(tx, private_key = pk)
@@ -31,7 +32,7 @@ def rebalance(limit_lower, base_lower, strategy, web3):
         {
             'value': 0,
             'chainId': 3,
-            'gas': web3.eth.generate_gas_price(),
+            'gas': web3.eth.getBlock("latest")['gasLimit'],
             'nonce': nonce
         })
         signed_tx = web3.eth.account.sign_transaction(tx, private_key = pk)
@@ -44,7 +45,7 @@ def rebalance(limit_lower, base_lower, strategy, web3):
         {
             'value': 0,
             'chainId': 3,
-            'gas': web3.eth.generate_gas_price(),
+            'gas': web3.eth.getBlock("latest")['gasLimit'],
             'nonce': nonce
         })
         signed_tx = web3.eth.account.sign_transaction(tx, private_key = pk)
