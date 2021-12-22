@@ -1,0 +1,6 @@
+
+vaults = {
+    'ropsten': [],
+    'rinkeby': [],
+    'mainnet': []
+}

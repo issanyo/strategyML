@@ -11,23 +11,19 @@ def rebalance(limit_lower, base_lower, strategy, web3):
 
         print('setBaseThreshold')
         nonce = web3.eth.getTransactionCount(keeper)
-        estimated_gas = web3.eth.estimate_gas({
-            'value': 0,
-            'chainId': 3,
-            'nonce': nonce
-        })
 
         tx = strategy.functions.setBaseThreshold(base_lower).buildTransaction(
         {
             'value': 0,
+            'from': keeper,
             'chainId': 3,
-            'gas': estimated_gas,
             'nonce': nonce
         })
-        
+                
         signed_tx = web3.eth.account.sign_transaction(tx, private_key = pk)
         tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
         tx_receipt = web3.eth.waitForTransactionReceipt(tx_hash)
+        
 
         print('setLimitThreshold')
         nonce = web3.eth.getTransactionCount(keeper)
@@ -35,7 +31,7 @@ def rebalance(limit_lower, base_lower, strategy, web3):
         {
             'value': 0,
             'chainId': 3,
-            'gas': estimated_gas,
+            'from': keeper,
             'nonce': nonce
         })
         signed_tx = web3.eth.account.sign_transaction(tx, private_key = pk)
@@ -48,7 +44,7 @@ def rebalance(limit_lower, base_lower, strategy, web3):
         {
             'value': 0,
             'chainId': 3,
-            'gas': estimated_gas,
+            'from': keeper,
             'nonce': nonce
         })
         signed_tx = web3.eth.account.sign_transaction(tx, private_key = pk)
