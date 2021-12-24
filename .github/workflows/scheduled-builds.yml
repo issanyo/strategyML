@@ -2,9 +2,10 @@
 name: Trigger data fetching from contract on a CRON Schedule
 
 on:
+  push:
+    branches: [ main ]
   schedule:
-    # Runs "at every 5 minutes" (see https://crontab.guru)
-    - cron: '0 9/12 * * *'
+    - cron: '0 9 * * *'
 jobs:
   build:
     name: Trigger keeper script
@@ -27,12 +28,12 @@ jobs:
           pipx ensurepath
       - name: Get env variable and fetch data from contracts
         env:
-          WEB3_INFURA_PROJECT_ID: ${{ secrets.ROPSTEN_INFURA_URL }}
-          PK: ${{ secrets.PK }}
+          ROPSTEN_INFURA_URL: ${{ secrets.ROPSTEN_INFURA_URL }}
+          ROPSTEN_PK: ${{ secrets.PK }}
+          ROPSTEN_KEEPER: ${{ secrets.KEEPER }}
           HOST: ${{ secrets.HOST }}
           DATABASE: ${{ secrets.DATABASE }}
           USER: ${{ secrets.USER }}
           PASSWORD: ${{ secrets.PASSWORD }}
-          KEEPER: ${{ secrets.KEEPER }}
         run: 
-          python main.py
+          python exec_ropsten.py

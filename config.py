@@ -5,7 +5,3 @@ vaults = {
     'rinkeby': [],
     'mainnet': []
 }
-
-infura = {
-    'ropsten': os.environ['ROPSTEN_INFURA_URL'],
-}
