@@ -8,7 +8,7 @@ on:
     - cron: '0 9 * * *'
 jobs:
   build:
-    name: Trigger keeper script
+    name: Keeper data and reblance Ropsten
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -16,9 +16,6 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: '3.8'
-      - name: Current directory
-        run: 
-          pwd
       - name: Install dependencies
         run: |
           sudo apt-get install expect
@@ -26,11 +23,11 @@ jobs:
           pip install --user pipx
           pip install -r requirements.txt
           pipx ensurepath
-      - name: Get env variable and fetch data from contracts
+      - name: Execute fetch data and run rebalance
         env:
           ROPSTEN_INFURA_URL: ${{ secrets.ROPSTEN_INFURA_URL }}
-          ROPSTEN_PK: ${{ secrets.PK }}
-          ROPSTEN_KEEPER: ${{ secrets.KEEPER }}
+          ROPSTEN_PK: ${{ secrets.ROPSTEN_PK }}
+          ROPSTEN_KEEPER: ${{ secrets.ROPSTEN_KEEPER }}
           HOST: ${{ secrets.HOST }}
           DATABASE: ${{ secrets.DATABASE }}
           USER: ${{ secrets.USER }}
