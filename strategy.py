@@ -79,7 +79,7 @@ def fetch_and_rebalance(network, infura_url, keeper, pk):
         timestamp = datetime.now()
 
         try:
-            if timestamp - last_rebalance > timedelta(hours=48):
+            if timestamp - last_rebalance > timedelta(hours=48) or True:
                 rebalance(theGraphData['limit_lower'], theGraphData['base_lower'], strategy, web3, keeper, pk)
                 last_rebalance = timestamp
                 rebalance_check = True
