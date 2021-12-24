@@ -78,15 +78,11 @@ def fetch_and_rebalance(network, infura_url, keeper, pk):
         last_rebalance = get_last_rebalance(cur, network)
         timestamp = datetime.now()
 
-        try:
-            if timestamp - last_rebalance > timedelta(hours=48) or True:
-                rebalance(theGraphData['limit_lower'], theGraphData['base_lower'], strategy, web3, keeper, pk)
-                last_rebalance = timestamp
-                rebalance_check = True
-            else:
-                rebalance_check = False
-        except Exception as e:
-            print(e)
+        rebalance_check = False
+        if timestamp - last_rebalance > timedelta(hours=48) or True:
+            rebalance(theGraphData['limit_lower'], theGraphData['base_lower'], strategy, web3, keeper, pk)
+            last_rebalance = timestamp
+            rebalance_check = True
 
         vault_data = get_vault_data(vault, strategy, web3, abi)
 
