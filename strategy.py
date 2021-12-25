@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 
 TIMEOUT_WAIT_TRANSACTION = 60*60*60*24 #24 hours max wait for transaction
 
-def get_nonce(ethereum_account_address):
+def get_nonce(ethereum_account_address, web3):
     return web3.eth.getTransactionCount(ethereum_account_address) + 1
 
 
@@ -24,7 +24,7 @@ def rebalance(limit_lower, base_lower, strategy, web3, keeper, pk):
         'value': 0,
         'from': keeper,
         'chainId': 3,
-        'nonce': get_nonce(keeper)
+        'nonce': get_nonce(keeper, web3)
     })
 
     signed_tx = web3.eth.account.sign_transaction(tx, private_key = pk)
@@ -38,7 +38,7 @@ def rebalance(limit_lower, base_lower, strategy, web3, keeper, pk):
         'value': 0,
         'chainId': 3,
         'from': keeper,
-        'nonce': get_nonce(keeper)
+        'nonce': get_nonce(keeper, web3)
     })
     signed_tx = web3.eth.account.sign_transaction(tx, private_key = pk)
     tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
@@ -50,7 +50,7 @@ def rebalance(limit_lower, base_lower, strategy, web3, keeper, pk):
         'value': 0,
         'chainId': 3,
         'from': keeper,
-        'nonce': get_nonce(keeper)
+        'nonce': get_nonce(keeper, web3)
     })
     signed_tx = web3.eth.account.sign_transaction(tx, private_key = pk)
     tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
