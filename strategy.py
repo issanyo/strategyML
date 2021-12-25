@@ -5,7 +5,7 @@ from config import vaults
 from db import insert_data
 from pandas.core import base
 from web3 import Web3, middleware
-from web3.gas_strategies.time_based import medium_gas_price_strategy
+from web3.gas_strategies.time_based import fast_gas_price_strategy
 from datetime import datetime, timedelta
 
 TIMEOUT_WAIT_TRANSACTION = 3600*4 #4 hours max wait for transaction
@@ -64,7 +64,7 @@ def fetch_and_rebalance(network, infura_url, keeper, pk):
     con = connect_db()
 
     web3 = Web3(Web3.HTTPProvider(infura_url))
-    web3.eth.set_gas_price_strategy(medium_gas_price_strategy)
+    web3.eth.set_gas_price_strategy(fast_gas_price_strategy)
 
     web3.middleware_onion.add(middleware.time_based_cache_middleware)
     web3.middleware_onion.add(middleware.latest_block_based_cache_middleware)
