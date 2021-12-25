@@ -8,7 +8,7 @@ from web3 import Web3, middleware
 from web3.gas_strategies.time_based import medium_gas_price_strategy
 from datetime import datetime, timedelta
 
-TIMEOUT_WAIT_TRANSACTION = 60*60*60*24 #24 hours max wait for transaction
+TIMEOUT_WAIT_TRANSACTION = 3600*4 #4 hours max wait for transaction
 
 def get_nonce(ethereum_account_address, web3):
     return web3.eth.getTransactionCount(ethereum_account_address) + 1
