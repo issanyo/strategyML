@@ -1,7 +1,7 @@
 import os
 
 vaults = {
-    'ropsten': ['0x3047B2b49f104F38f3b3f1AC9b8Df1C62726251E'],
+    'ropsten': ['0xfD2f29A150871dFc7Ea0559C6e0dbA2A01A9ec5B'],
     'rinkeby': [],
     'mainnet': []
 }
