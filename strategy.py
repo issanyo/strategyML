@@ -8,51 +8,53 @@ from web3 import Web3, middleware
 from web3.gas_strategies.time_based import medium_gas_price_strategy
 from datetime import datetime, timedelta
 
+TIMEOUT_WAIT_TRANSACTION = 60*60*60*24 #24 hours max wait for transaction
+
+def get_nonce(ethereum_account_address):
+    return web3.eth.getTransactionCount(ethereum_account_address) + 1
+
 
 def rebalance(limit_lower, base_lower, strategy, web3, keeper, pk):
     print('Rebalancing...')
 
     print('setBaseThreshold')
-    nonce = web3.eth.getTransactionCount(keeper)
 
     tx = strategy.functions.setBaseThreshold(base_lower).buildTransaction(
     {
         'value': 0,
         'from': keeper,
         'chainId': 3,
-        'nonce': nonce
+        'nonce': get_nonce(keeper)
     })
 
     signed_tx = web3.eth.account.sign_transaction(tx, private_key = pk)
     tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
-    tx_receipt = web3.eth.waitForTransactionReceipt(tx_hash)
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash, timeout=TIMEOUT_WAIT_TRANSACTION)
 
 
     print('setLimitThreshold')
-    nonce = web3.eth.getTransactionCount(keeper)
     tx = strategy.functions.setLimitThreshold(limit_lower).buildTransaction(
     {
         'value': 0,
         'chainId': 3,
         'from': keeper,
-        'nonce': nonce
+        'nonce': get_nonce(keeper)
     })
     signed_tx = web3.eth.account.sign_transaction(tx, private_key = pk)
     tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
-    tx_receipt = web3.eth.waitForTransactionReceipt(tx_hash)
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash, timeout=TIMEOUT_WAIT_TRANSACTION)
 
     print('rebalance tx')
-    nonce = web3.eth.getTransactionCount(keeper)
     tx = strategy.functions.rebalance().buildTransaction(
     {
         'value': 0,
         'chainId': 3,
         'from': keeper,
-        'nonce': nonce
+        'nonce': get_nonce(keeper)
     })
     signed_tx = web3.eth.account.sign_transaction(tx, private_key = pk)
     tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
-    tx_receipt = web3.eth.waitForTransactionReceipt(tx_hash)
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash, timeout=TIMEOUT_WAIT_TRANSACTION)
 
     print('Rebalance successful, transaction: ', tx_receipt)
 
