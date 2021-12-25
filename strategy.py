@@ -8,7 +8,7 @@ from web3 import Web3, middleware
 from web3.gas_strategies.time_based import fast_gas_price_strategy
 from datetime import datetime, timedelta
 
-TIMEOUT_WAIT_TRANSACTION = 3600*4 #4 hours max wait for transaction
+TIMEOUT_WAIT_TRANSACTION = 3600*1 #1 hours max wait for transaction
 
 def get_nonce(ethereum_account_address, web3):
     return web3.eth.getTransactionCount(ethereum_account_address) + 1
@@ -17,40 +17,44 @@ def get_nonce(ethereum_account_address, web3):
 def rebalance(limit_lower, base_lower, strategy, web3, keeper, pk):
     print('Rebalancing...')
 
-    print('setBaseThreshold')
+    estimation = strategy.functions.setBaseThreshold(base_lower).estimateGas({'from': keeper})
+    print('setBaseThreshold, gas estimate: ', estimation)
 
     tx = strategy.functions.setBaseThreshold(base_lower).buildTransaction(
     {
         'value': 0,
         'from': keeper,
-        'chainId': 3,
-        'nonce': get_nonce(keeper, web3)
+        'nonce': get_nonce(keeper, web3),
+        'gas': estimation
     })
 
     signed_tx = web3.eth.account.sign_transaction(tx, private_key = pk)
     tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash, timeout=TIMEOUT_WAIT_TRANSACTION)
 
+    estimation = strategy.functions.setLimitThreshold(limit_lower).estimateGas({'from': keeper})
+    print('setLimitThreshold, gas estimate: ', estimation)
 
-    print('setLimitThreshold')
     tx = strategy.functions.setLimitThreshold(limit_lower).buildTransaction(
     {
         'value': 0,
-        'chainId': 3,
         'from': keeper,
-        'nonce': get_nonce(keeper, web3)
+        'nonce': get_nonce(keeper, web3),
+        'gas': estimation
     })
     signed_tx = web3.eth.account.sign_transaction(tx, private_key = pk)
     tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash, timeout=TIMEOUT_WAIT_TRANSACTION)
 
-    print('rebalance tx')
+    estimation = strategy.functions.rebalance().estimateGas({'from': keeper})
+    print('Rebalance, gas estimate: ', estimation)
+
     tx = strategy.functions.rebalance().buildTransaction(
     {
         'value': 0,
-        'chainId': 3,
         'from': keeper,
-        'nonce': get_nonce(keeper, web3)
+        'nonce': get_nonce(keeper, web3),
+        'gas': estimation
     })
     signed_tx = web3.eth.account.sign_transaction(tx, private_key = pk)
     tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
