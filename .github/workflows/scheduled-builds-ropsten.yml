@@ -3,7 +3,7 @@ name: Trigger data fetching from contract on a CRON Schedule
 
 on:
   schedule:
-    - cron: '0 9 * * *'
+    - cron: '0 20 * * *'
 jobs:
   build:
     name: Keeper data and reblance Ropsten
