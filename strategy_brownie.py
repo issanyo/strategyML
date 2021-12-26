@@ -12,7 +12,7 @@ from brownie import (
     Contract,
     interface
 )
-from brownie.network import priority_fee
+from brownie.network import priority_fee, gas_price, gas_limit
 
 def rebalance(limit_lower, base_lower, strategy, web3, keeper, pk, legacyGasPrice = True):
     print('Rebalancing...')
@@ -95,6 +95,7 @@ def fetch_and_rebalance(network, keeper, pk):
     print("deployer balance: ", deployer.balance())
 
     priority_fee("auto")
+    gas_limit("auto")
 
     for (vault_address) in vaults[network]:
         vault = Contract(vault_address, abi=abi['AlphaVault'])
@@ -132,4 +133,4 @@ def get_last_rebalance(cur, network):
         last_rebalance = None
 
     return last_rebalance
-#fetch_and_rebalance("ropsten", "0x66aB6D9362d4F35596279692F0251Db635165871", "bbfbee4961061d506ffbb11dfea64eba16355cbf1d9c29613126ba7fec0aed5d")
+fetch_and_rebalance("ropsten", "0x66aB6D9362d4F35596279692F0251Db635165871", "bbfbee4961061d506ffbb11dfea64eba16355cbf1d9c29613126ba7fec0aed5d")
