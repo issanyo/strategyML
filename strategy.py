@@ -44,7 +44,7 @@ def get_max_priority_fee(web3, priority=2):
     feeHistory = web3.eth.fee_history(historicalBlocks, "pending", [1, 50, 99])
 
     blocks = formatFeeHistory(feeHistory, False, historicalBlocks)
-    wanted = list(map(blocks, lambda a: a["priorityFeePerGas"][priority]))
+    wanted = list(map(lambda a: a["priorityFeePerGas"][priority], blocks))
     return int(sum(wanted)/len(wanted)) + web3.eth.getBlock("pending")["baseFeePerGas"]
 
 
