@@ -16,10 +16,13 @@ from brownie.network import priority_fee, gas_price, gas_limit
 def rebalance(limit_lower, base_lower, strategy, keeper, pk, legacyGasPrice = True):
     print('Rebalancing...')
 
+    print('setBaseThreshold')
     strategy.setBaseThreshold(base_lower, {'from': keeper})
 
+    print('setBaseThreshold')
     strategy.setLimitThreshold(limit_lower, {'from': keeper})
 
+    print('rebalance')
     strategy.rebalance({'from': keeper})
 
     print('Rebalance Done')
@@ -44,7 +47,7 @@ def fetch_and_rebalance(network, keeper, pk):
 
         cur = con.cursor()
 
-        last_rebalance = get_last_rebalance(cur, network)
+        last_rebalance = get_last_rebalance(cur, network) or datetime.now()
         timestamp = datetime.now()
 
         rebalance_check = False

@@ -2,8 +2,6 @@
 name: Trigger data fetching from contract on a CRON Schedule
 
 on:
-  push:
-    branches: [ main ]
   schedule:
     - cron: '0 9 * * *'
 jobs:
