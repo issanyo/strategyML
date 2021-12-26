@@ -97,8 +97,8 @@ def fetch_and_rebalance(network, keeper, pk):
     gas_limit("auto")
 
     for (vault_address) in vaults[network]:
-        vault = Contract(vault_address, abi=abi['AlphaVault'])
-        strategy = Contract(vault.strategy(), abi=abi['DynamicRangesStrategy'])
+        vault = Contract("OrbitVault", address=vault_address, abi=abi['AlphaVault'])
+        strategy = Contract("DynamicRangesStrategy", address=vault.strategy(), abi=abi['DynamicRangesStrategy'])
 
         theGraphData = fetch_thegraph_data(strategy)
 
