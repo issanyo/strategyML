@@ -1,8 +1,8 @@
-from utils import get_contract_abi, connect_db
-from vault import get_vault_data
-from the_graph_data import fetch_thegraph_data
-from config import vaults
-from db import insert_data
+from .utils import get_contract_abi, connect_db
+from .vault import get_vault_data
+from .the_graph_data import fetch_thegraph_data
+from .config import vaults
+from .db import insert_data
 from datetime import datetime, timedelta
 from brownie import (
     accounts,
