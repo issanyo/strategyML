@@ -33,6 +33,7 @@ jobs:
           PK: ${{ secrets.ARBITRUM_PK }}
           KEEPER: ${{ secrets.ARBITRUM_KEEPER }}
           VAULT_CONFIG: arbitrum
+          LEGACY_GAS: True
           HOST: ${{ secrets.HOST }}
           DATABASE: ${{ secrets.DATABASE }}
           USER: ${{ secrets.USER }}

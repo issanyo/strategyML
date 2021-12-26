@@ -12,6 +12,7 @@ from brownie import (
     Contract
 )
 from brownie.network import priority_fee, gas_price, gas_limit
+from brownie.network.gas.strategies import ExponentialScalingStrategy
 
 def rebalance(limit_lower, base_lower, strategy, keeper, pk, legacyGasPrice = True):
     print('Rebalancing...')
@@ -28,7 +29,7 @@ def rebalance(limit_lower, base_lower, strategy, keeper, pk, legacyGasPrice = Tr
     print('Rebalance Done')
 
 
-def fetch_and_rebalance(network, keeper, pk):
+def fetch_and_rebalance(network, keeper, pk, legacy_gas=False):
     abi = get_contract_abi()
     con = connect_db()
 
@@ -36,7 +37,10 @@ def fetch_and_rebalance(network, keeper, pk):
     deployer = accounts[0]
     print("deployer balance: ", deployer.balance())
 
-    priority_fee("auto")
+    if legacy_gas:
+        gas_price(ExponentialScalingStrategy("1 gwei", "2 gwei"))
+    else:
+        priority_fee("auto")
     gas_limit("auto")
 
     for (vault_address) in vaults[network]:
