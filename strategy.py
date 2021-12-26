@@ -11,7 +11,7 @@ TIMEOUT_WAIT_TRANSACTION = 3600*2 #2 hours max wait for transaction
 TRANSACTION_POLL_LATENCY = 10
 
 def get_nonce(ethereum_account_address, web3):
-    return web3.eth.getTransactionCount(ethereum_account_address, 'latest') + 1
+    return web3.eth.getTransactionCount(ethereum_account_address) + 1
 
 
 def rebalance(limit_lower, base_lower, strategy, web3, keeper, pk):
@@ -25,6 +25,7 @@ def rebalance(limit_lower, base_lower, strategy, web3, keeper, pk):
     {
         'value': 0,
         'from': keeper,
+        'nonce': get_nonce(keeper, web3),
         'maxFeePerGas': web3.eth.max_priority_fee * 2,
         'maxPriorityFeePerGas': web3.eth.max_priority_fee
     })
@@ -40,6 +41,7 @@ def rebalance(limit_lower, base_lower, strategy, web3, keeper, pk):
     {
         'value': 0,
         'from': keeper,
+        'nonce': get_nonce(keeper, web3),
         'maxFeePerGas': web3.eth.max_priority_fee * 2,
         'maxPriorityFeePerGas': web3.eth.max_priority_fee
     })
@@ -54,6 +56,7 @@ def rebalance(limit_lower, base_lower, strategy, web3, keeper, pk):
     {
         'value': 0,
         'from': keeper,
+        'nonce': get_nonce(keeper, web3),
         'maxFeePerGas': web3.eth.max_priority_fee * 2,
         'maxPriorityFeePerGas': web3.eth.max_priority_fee
     })
