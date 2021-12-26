@@ -133,4 +133,3 @@ def get_last_rebalance(cur, network):
         last_rebalance = None
 
     return last_rebalance
-fetch_and_rebalance("ropsten", "0x66aB6D9362d4F35596279692F0251Db635165871", "bbfbee4961061d506ffbb11dfea64eba16355cbf1d9c29613126ba7fec0aed5d")

@@ -24,6 +24,8 @@ jobs:
           pip install -r requirements.txt
           pipx ensurepath
           pipx install eth-brownie
+          pipx inject eth-brownie psycopg2
+          pipx inject eth-brownie pandas
           brownie --version
       - name: Set network
         run: brownie networks add live infura host=${{ secrets.ROPSTEN_INFURA_URL }} chainid=3 explorer=https://api-ropsten.etherscan.io/api
@@ -36,5 +38,5 @@ jobs:
           DATABASE: ${{ secrets.DATABASE }}
           USER: ${{ secrets.USER }}
           PASSWORD: ${{ secrets.PASSWORD }}
-        run: 
+        run:
           brownie run exec_ropsten --network infura
