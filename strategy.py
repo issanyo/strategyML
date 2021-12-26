@@ -61,6 +61,7 @@ def rebalance(limit_lower, base_lower, strategy, web3, keeper, pk):
         'value': 0,
         'from': keeper,
         'nonce': get_nonce(keeper, web3),
+        'gasPrice': priority + estimation,
         'maxFeePerGas': (priority + estimation) *10,
         'maxPriorityFeePerGas': priority + estimation
     })
@@ -78,6 +79,7 @@ def rebalance(limit_lower, base_lower, strategy, web3, keeper, pk):
         'value': 0,
         'from': keeper,
         'nonce': get_nonce(keeper, web3),
+        'gasPrice': priority + estimation,
         'maxFeePerGas': (priority + estimation) *10,
         'maxPriorityFeePerGas': priority + estimation
     })
@@ -94,6 +96,7 @@ def rebalance(limit_lower, base_lower, strategy, web3, keeper, pk):
         'value': 0,
         'from': keeper,
         'nonce': get_nonce(keeper, web3),
+        'gasPrice': priority + estimation,
         'maxFeePerGas': (priority + estimation) *20,
         'maxPriorityFeePerGas': priority + estimation
     })
