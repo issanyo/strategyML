@@ -21,11 +21,9 @@ jobs:
           sudo apt-get install expect
           python -m pip install --upgrade pip
           pip install --user pipx
-          pip install -r requirements.txt
           pipx ensurepath
           pipx install eth-brownie
-          pipx inject eth-brownie psycopg2
-          pipx inject eth-brownie pandas
+          pipx inject eth-brownie psycopg2-binary pandas
           brownie --version
       - name: Set network
         run: brownie networks add live infura host=${{ secrets.ROPSTEN_INFURA_URL }} chainid=3 explorer=https://api-ropsten.etherscan.io/api
