@@ -5,14 +5,13 @@ from config import vaults
 from db import insert_data
 from pandas.core import base
 from web3 import Web3, middleware
-from web3.gas_strategies.time_based import fast_gas_price_strategy
 from datetime import datetime, timedelta
 
 TIMEOUT_WAIT_TRANSACTION = 3600*2 #2 hours max wait for transaction
 TRANSACTION_POLL_LATENCY = 10
 
 def get_nonce(ethereum_account_address, web3):
-    return web3.eth.getTransactionCount(ethereum_account_address) + 1
+    return web3.eth.getTransactionCount(ethereum_account_address, 'latest') + 1
 
 
 def rebalance(limit_lower, base_lower, strategy, web3, keeper, pk):
@@ -21,12 +20,14 @@ def rebalance(limit_lower, base_lower, strategy, web3, keeper, pk):
     estimation = strategy.functions.setBaseThreshold(base_lower).estimateGas({'from': keeper})
     print('setBaseThreshold, gas estimate: ', estimation)
 
+    # Dynamic fee transaction, introduced by EIP-1559
     tx = strategy.functions.setBaseThreshold(base_lower).buildTransaction(
     {
         'value': 0,
         'from': keeper,
         'nonce': get_nonce(keeper, web3),
-        'gas': estimation
+        'maxFeePerGas': web3.eth.max_priority_fee * 2,
+        'maxPriorityFeePerGas': web3.eth.max_priority_fee
     })
 
     signed_tx = web3.eth.account.sign_transaction(tx, private_key = pk)
@@ -41,7 +42,8 @@ def rebalance(limit_lower, base_lower, strategy, web3, keeper, pk):
         'value': 0,
         'from': keeper,
         'nonce': get_nonce(keeper, web3),
-        'gas': estimation
+        'maxFeePerGas': web3.eth.max_priority_fee * 2,
+        'maxPriorityFeePerGas': web3.eth.max_priority_fee
     })
     signed_tx = web3.eth.account.sign_transaction(tx, private_key = pk)
     tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
@@ -55,7 +57,8 @@ def rebalance(limit_lower, base_lower, strategy, web3, keeper, pk):
         'value': 0,
         'from': keeper,
         'nonce': get_nonce(keeper, web3),
-        'gas': estimation
+        'maxFeePerGas': web3.eth.max_priority_fee * 2,
+        'maxPriorityFeePerGas': web3.eth.max_priority_fee
     })
     signed_tx = web3.eth.account.sign_transaction(tx, private_key = pk)
     tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
@@ -69,11 +72,7 @@ def fetch_and_rebalance(network, infura_url, keeper, pk):
     con = connect_db()
 
     web3 = Web3(Web3.HTTPProvider(infura_url))
-    web3.eth.set_gas_price_strategy(fast_gas_price_strategy)
 
-    web3.middleware_onion.add(middleware.time_based_cache_middleware)
-    web3.middleware_onion.add(middleware.latest_block_based_cache_middleware)
-    web3.middleware_onion.add(middleware.simple_cache_middleware)
     for (vault_address) in vaults[network]:
         vault = web3.eth.contract(vault_address, abi=abi['AlphaVault'])
         strategy = web3.eth.contract(vault.functions.strategy().call(), abi=abi['DynamicRangesStrategy'])
