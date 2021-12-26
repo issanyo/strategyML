@@ -25,7 +25,6 @@ def rebalance(limit_lower, base_lower, strategy, web3, keeper, pk):
     {
         'value': 0,
         'from': keeper,
-        'nonce': get_nonce(keeper, web3),
         'maxFeePerGas': web3.eth.max_priority_fee * 2,
         'maxPriorityFeePerGas': web3.eth.max_priority_fee
     })
@@ -41,7 +40,6 @@ def rebalance(limit_lower, base_lower, strategy, web3, keeper, pk):
     {
         'value': 0,
         'from': keeper,
-        'nonce': get_nonce(keeper, web3),
         'maxFeePerGas': web3.eth.max_priority_fee * 2,
         'maxPriorityFeePerGas': web3.eth.max_priority_fee
     })
@@ -56,7 +54,6 @@ def rebalance(limit_lower, base_lower, strategy, web3, keeper, pk):
     {
         'value': 0,
         'from': keeper,
-        'nonce': get_nonce(keeper, web3),
         'maxFeePerGas': web3.eth.max_priority_fee * 2,
         'maxPriorityFeePerGas': web3.eth.max_priority_fee
     })
