@@ -37,4 +37,4 @@ jobs:
           USER: ${{ secrets.USER }}
           PASSWORD: ${{ secrets.PASSWORD }}
         run: 
-          brownie run exec_ropsten --network live
+          brownie run exec_ropsten --network infura
