@@ -23,6 +23,10 @@ jobs:
           pip install --user pipx
           pip install -r requirements.txt
           pipx ensurepath
+          pipx install eth-brownie
+          brownie --version
+      - name: Set network
+        run: brownie networks add live infura host=${{ secrets.ROPSTEN_INFURA_URL }} chainid=3 explorer=https://api-ropsten.etherscan.io/api
       - name: Execute fetch data and run rebalance
         env:
           ROPSTEN_INFURA_URL: ${{ secrets.ROPSTEN_INFURA_URL }}
@@ -33,4 +37,4 @@ jobs:
           USER: ${{ secrets.USER }}
           PASSWORD: ${{ secrets.PASSWORD }}
         run: 
-          python -u exec_ropsten.py
+          brownie run exec_ropsten --network live
