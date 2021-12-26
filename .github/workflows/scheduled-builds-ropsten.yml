@@ -33,4 +33,4 @@ jobs:
           USER: ${{ secrets.USER }}
           PASSWORD: ${{ secrets.PASSWORD }}
         run: 
-          python exec_ropsten.py
+          python -u exec_ropsten.py

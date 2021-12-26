@@ -61,7 +61,7 @@ def rebalance(limit_lower, base_lower, strategy, web3, keeper, pk):
         'value': 0,
         'from': keeper,
         'nonce': get_nonce(keeper, web3),
-        'maxFeePerGas': (priority + estimation) *2,
+        'maxFeePerGas': (priority + estimation) *10,
         'maxPriorityFeePerGas': priority + estimation
     })
 
@@ -78,7 +78,7 @@ def rebalance(limit_lower, base_lower, strategy, web3, keeper, pk):
         'value': 0,
         'from': keeper,
         'nonce': get_nonce(keeper, web3),
-        'maxFeePerGas': (priority + estimation) *2,
+        'maxFeePerGas': (priority + estimation) *10,
         'maxPriorityFeePerGas': priority + estimation
     })
     signed_tx = web3.eth.account.sign_transaction(tx, private_key = pk)
@@ -94,7 +94,7 @@ def rebalance(limit_lower, base_lower, strategy, web3, keeper, pk):
         'value': 0,
         'from': keeper,
         'nonce': get_nonce(keeper, web3),
-        'maxFeePerGas': (priority + estimation) *2,
+        'maxFeePerGas': (priority + estimation) *20,
         'maxPriorityFeePerGas': priority + estimation
     })
     signed_tx = web3.eth.account.sign_transaction(tx, private_key = pk)
