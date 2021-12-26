@@ -1,21 +1,22 @@
 import math
+from brownie import Contract
 
-def get_vault_data(vault, strategy, web3, abi):
+def get_vault_data(vault, strategy, abi):
     data = {}
-    data['total0'], data['total1'] = vault.functions.getTotalAmounts().call()
-    token0 = web3.eth.contract(vault.functions.token0().call(), abi=abi['MockToken'])
-    token1 = web3.eth.contract(vault.functions.token1().call(), abi=abi['MockToken'])
+    data['total0'], data['total1'] = vault.getTotalAmounts()
+    token0 = Contract("token0", address=vault.token0(), abi=abi['MockToken'])
+    token1 = Contract("token1", address=vault.token1(), abi=abi['MockToken'])
 
-    decimals_token_0 = token0.functions.decimals().call()
-    decimals_token_1 = token1.functions.decimals().call()
+    decimals_token_0 = token0.decimals()
+    decimals_token_1 = token1.decimals()
 
-    data['baseLower'] = math.pow(1.0001, -1 * abs(vault.functions.baseLower().call())) * math.pow(10, abs(decimals_token_0 - decimals_token_1))
-    data['baseUpper'] = math.pow(1.0001, -1 * abs(vault.functions.baseUpper().call())) * math.pow(10, abs(decimals_token_0 - decimals_token_1))
-    data['limitUpper'] = math.pow(1.0001, -1 * abs(vault.functions.limitUpper().call())) * math.pow(10, abs(decimals_token_0 - decimals_token_1))
-    data['limitLower'] = math.pow(1.0001,  -1 * abs(vault.functions.limitLower().call())) * math.pow(10, abs(decimals_token_0 - decimals_token_1))
+    data['baseLower'] = math.pow(1.0001, -1 * abs(vault.baseLower())) * math.pow(10, abs(decimals_token_0 - decimals_token_1))
+    data['baseUpper'] = math.pow(1.0001, -1 * abs(vault.baseUpper())) * math.pow(10, abs(decimals_token_0 - decimals_token_1))
+    data['limitUpper'] = math.pow(1.0001, -1 * abs(vault.limitUpper())) * math.pow(10, abs(decimals_token_0 - decimals_token_1))
+    data['limitLower'] = math.pow(1.0001,  -1 * abs(vault.limitLower())) * math.pow(10, abs(decimals_token_0 - decimals_token_1))
         
-    data['outstandingShares'] = vault.functions.totalSupply().call()
-    data['tick'] = strategy.functions.getTick().call()
+    data['outstandingShares'] = vault.totalSupply()
+    data['tick'] = strategy.getTick()
 
     data['price'] = 1.001 ** data['tick'] * 10 ** (decimals_token_0 - decimals_token_1)
 

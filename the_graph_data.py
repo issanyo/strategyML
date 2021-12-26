@@ -58,9 +58,9 @@ def fetch_thegraph_data(strategy):
     std_deviation = data_df[["pct_change_close"]].std().iloc[-1]
     print("std deviation is " + str(std_deviation))
 
-    tick_spacing = strategy.functions.tickSpacing().call()
+    tick_spacing = strategy.tickSpacing()
     print('tick_spacing is: ' + str(tick_spacing))
-    tick = strategy.functions.getTick().call()
+    tick = strategy.getTick()
     print('tick is: ' + str(tick))
     print(str(1.0001 ** tick))
 

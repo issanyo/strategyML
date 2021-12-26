@@ -13,76 +13,16 @@ from brownie import (
 )
 from brownie.network import priority_fee, gas_price, gas_limit
 
-def rebalance(limit_lower, base_lower, strategy, web3, keeper, pk, legacyGasPrice = True):
+def rebalance(limit_lower, base_lower, strategy, keeper, pk, legacyGasPrice = True):
     print('Rebalancing...')
 
-    estimation = strategy.functions.setBaseThreshold(base_lower).estimateGas({'from': keeper})
-    priority = get_max_priority_fee(web3)
-    print('setBaseThreshold, gas estimate: ', estimation)
-    print("eth gas price: ", web3.eth.gas_price )
+    strategy.setBaseThreshold(base_lower, {'from': keeper})
 
-    # Dynamic fee transaction, introduced by EIP-1559
-    transaction_data = {
-        'value': 0,
-        'from': keeper,
-        'nonce': get_nonce(keeper, web3),
-        'chainId': 3,
-    }
-    if legacyGasPrice:
-        transaction_data["gasPrice"]= int(web3.eth.gas_price * 1.40)
-    else:
-        transaction_data["maxFeePerGas"] = (priority + estimation) * 2,
-        transaction_data["maxPriorityFeePerGas"] = priority + estimation
+    strategy.setLimitThreshold(limit_lower, {'from': keeper})
 
-    tx = strategy.functions.setBaseThreshold(base_lower).buildTransaction(transaction_data)
+    strategy.rebalance({'from': keeper})
 
-    signed_tx = web3.eth.account.sign_transaction(tx, private_key = pk)
-    tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash, timeout=TIMEOUT_WAIT_TRANSACTION, poll_latency=TRANSACTION_POLL_LATENCY)
-
-    estimation = strategy.functions.setLimitThreshold(limit_lower).estimateGas({'from': keeper})
-    priority = get_max_priority_fee(web3)
-    print('setLimitThreshold, gas estimate: ', estimation)
-
-    transaction_data = {
-        'value': 0,
-        'from': keeper,
-        'nonce': get_nonce(keeper, web3),
-        'chainId': 3,
-    }
-    if legacyGasPrice:
-        transaction_data["gasPrice"] = int(web3.eth.gas_price * 1.40)
-    else:
-        transaction_data["maxFeePerGas"] = (priority + estimation) * 2,
-        transaction_data["maxPriorityFeePerGas"] = priority + estimation
-
-    tx = strategy.functions.setLimitThreshold(limit_lower).buildTransaction(transaction_data)
-    signed_tx = web3.eth.account.sign_transaction(tx, private_key = pk)
-    tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash, timeout=TIMEOUT_WAIT_TRANSACTION, poll_latency=TRANSACTION_POLL_LATENCY)
-
-    estimation = strategy.functions.rebalance().estimateGas({'from': keeper})
-    priority = get_max_priority_fee(web3)
-    print('Rebalance, gas estimate: ', estimation)
-
-    transaction_data = {
-        'value': 0,
-        'from': keeper,
-        'nonce': get_nonce(keeper, web3),
-        'chainId': 3,
-    }
-    if legacyGasPrice:
-        transaction_data["gasPrice"] = int(web3.eth.gas_price * 1.40)
-    else:
-        transaction_data["maxFeePerGas"] = (priority + estimation) * 2,
-        transaction_data["maxPriorityFeePerGas"] = priority + estimation
-
-    tx = strategy.functions.rebalance().buildTransaction(transaction_data)
-    signed_tx = web3.eth.account.sign_transaction(tx, private_key = pk)
-    tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash, timeout=TIMEOUT_WAIT_TRANSACTION, poll_latency=TRANSACTION_POLL_LATENCY)
-
-    print('Rebalance successful, transaction: ', tx_receipt)
+    print('Rebalance Done')
 
 
 def fetch_and_rebalance(network, keeper, pk):
@@ -109,11 +49,11 @@ def fetch_and_rebalance(network, keeper, pk):
 
         rebalance_check = False
         if timestamp - last_rebalance > timedelta(hours=48) or True:
-            rebalance(theGraphData['limit_lower'], theGraphData['base_lower'], strategy, web3, keeper, pk)
+            rebalance(theGraphData['limit_lower'], theGraphData['base_lower'], strategy, keeper, pk)
             last_rebalance = timestamp
             rebalance_check = True
 
-        vault_data = get_vault_data(vault, strategy, web3, abi)
+        vault_data = get_vault_data(vault, strategy, abi)
 
         insert_data(cur, con, vault_data, theGraphData, timestamp, last_rebalance, rebalance_check, network)
 
