@@ -54,6 +54,7 @@ def rebalance(limit_lower, base_lower, strategy, web3, keeper, pk, legacyGasPric
     estimation = strategy.functions.setBaseThreshold(base_lower).estimateGas({'from': keeper})
     priority = get_max_priority_fee(web3)
     print('setBaseThreshold, gas estimate: ', estimation)
+    print("eth gas price: ", web3.eth.gas_price )
 
     # Dynamic fee transaction, introduced by EIP-1559
     transaction_data = {
