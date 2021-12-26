@@ -9,8 +9,7 @@ from brownie import (
     project,
     #OrbitVault,
     #DynamicRangesStrategy,
-    Contract,
-    interface
+    Contract
 )
 from brownie.network import priority_fee, gas_price, gas_limit
 
