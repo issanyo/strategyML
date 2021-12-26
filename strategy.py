@@ -48,7 +48,7 @@ def get_max_priority_fee(web3, priority=2):
     return int(sum(wanted)/len(wanted)) + web3.eth.getBlock("pending")["baseFeePerGas"]
 
 
-def rebalance(limit_lower, base_lower, strategy, web3, keeper, pk):
+def rebalance(limit_lower, base_lower, strategy, web3, keeper, pk, legacyGasPrice = True):
     print('Rebalancing...')
 
     estimation = strategy.functions.setBaseThreshold(base_lower).estimateGas({'from': keeper})
@@ -56,15 +56,18 @@ def rebalance(limit_lower, base_lower, strategy, web3, keeper, pk):
     print('setBaseThreshold, gas estimate: ', estimation)
 
     # Dynamic fee transaction, introduced by EIP-1559
-    tx = strategy.functions.setBaseThreshold(base_lower).buildTransaction(
-    {
+    transaction_data = {
         'value': 0,
         'from': keeper,
-        'nonce': get_nonce(keeper, web3),
-        'gasPrice': priority + estimation,
-        'maxFeePerGas': (priority + estimation) *10,
-        'maxPriorityFeePerGas': priority + estimation
-    })
+        'nonce': get_nonce(keeper, web3)
+    }
+    if legacyGasPrice:
+        transaction_data["gasPrice"]= (priority + estimation)*2
+    else:
+        transaction_data["maxFeePerGas"] = (priority + estimation) * 2,
+        transaction_data["maxPriorityFeePerGas"] = priority + estimation
+
+    tx = strategy.functions.setBaseThreshold(base_lower).buildTransaction(transaction_data)
 
     signed_tx = web3.eth.account.sign_transaction(tx, private_key = pk)
     tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
@@ -74,15 +77,18 @@ def rebalance(limit_lower, base_lower, strategy, web3, keeper, pk):
     priority = get_max_priority_fee(web3)
     print('setLimitThreshold, gas estimate: ', estimation)
 
-    tx = strategy.functions.setLimitThreshold(limit_lower).buildTransaction(
-    {
+    transaction_data = {
         'value': 0,
         'from': keeper,
-        'nonce': get_nonce(keeper, web3),
-        'gasPrice': priority + estimation,
-        'maxFeePerGas': (priority + estimation) *10,
-        'maxPriorityFeePerGas': priority + estimation
-    })
+        'nonce': get_nonce(keeper, web3)
+    }
+    if legacyGasPrice:
+        transaction_data["gasPrice"] = (priority + estimation) * 2
+    else:
+        transaction_data["maxFeePerGas"] = (priority + estimation) * 2,
+        transaction_data["maxPriorityFeePerGas"] = priority + estimation
+
+    tx = strategy.functions.setLimitThreshold(limit_lower).buildTransaction(transaction_data)
     signed_tx = web3.eth.account.sign_transaction(tx, private_key = pk)
     tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash, timeout=TIMEOUT_WAIT_TRANSACTION, poll_latency=TRANSACTION_POLL_LATENCY)
@@ -91,15 +97,18 @@ def rebalance(limit_lower, base_lower, strategy, web3, keeper, pk):
     priority = get_max_priority_fee(web3)
     print('Rebalance, gas estimate: ', estimation)
 
-    tx = strategy.functions.rebalance().buildTransaction(
-    {
+    transaction_data = {
         'value': 0,
         'from': keeper,
-        'nonce': get_nonce(keeper, web3),
-        'gasPrice': priority + estimation,
-        'maxFeePerGas': (priority + estimation) *20,
-        'maxPriorityFeePerGas': priority + estimation
-    })
+        'nonce': get_nonce(keeper, web3)
+    }
+    if legacyGasPrice:
+        transaction_data["gasPrice"] = (priority + estimation) * 10
+    else:
+        transaction_data["maxFeePerGas"] = (priority + estimation) * 2,
+        transaction_data["maxPriorityFeePerGas"] = priority + estimation
+
+    tx = strategy.functions.rebalance().buildTransaction(transaction_data)
     signed_tx = web3.eth.account.sign_transaction(tx, private_key = pk)
     tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash, timeout=TIMEOUT_WAIT_TRANSACTION, poll_latency=TRANSACTION_POLL_LATENCY)
