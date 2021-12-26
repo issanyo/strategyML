@@ -8,7 +8,7 @@ on:
     - cron: '0 9 * * *'
 jobs:
   build:
-    name: Keeper data and reblance Ropsten
+    name: Keeper data and reblance Arbitrum
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -26,13 +26,13 @@ jobs:
           pipx inject eth-brownie psycopg2-binary pandas
           brownie --version
       - name: Set network
-        run: brownie networks add live infura host=${{ secrets.ROPSTEN_INFURA_URL }} chainid=3 explorer=https://api-ropsten.etherscan.io/api
+        run: brownie networks add live infura host=${{ secrets.ARBITRUM_INFURA_URL }} chainid=42161 explorer=https://arbiscan.io/
       - name: Execute fetch data and run rebalance
         env:
-          INFURA_URL: ${{ secrets.ROPSTEN_INFURA_URL }}
-          PK: ${{ secrets.ROPSTEN_PK }}
-          KEEPER: ${{ secrets.ROPSTEN_KEEPER }}
-          VAULT_CONFIG: ropsten
+          INFURA_URL: ${{ secrets.ARBITRUM_INFURA_URL }}
+          PK: ${{ secrets.ARBITRUM_PK }}
+          KEEPER: ${{ secrets.ARBITRUM_KEEPER }}
+          VAULT_CONFIG: arbitrum
           HOST: ${{ secrets.HOST }}
           DATABASE: ${{ secrets.DATABASE }}
           USER: ${{ secrets.USER }}
