@@ -8,7 +8,8 @@ from web3 import Web3, middleware
 from web3.gas_strategies.time_based import fast_gas_price_strategy
 from datetime import datetime, timedelta
 
-TIMEOUT_WAIT_TRANSACTION = 3600*1 #1 hours max wait for transaction
+TIMEOUT_WAIT_TRANSACTION = 3600*2 #2 hours max wait for transaction
+TRANSACTION_POLL_LATENCY = 10
 
 def get_nonce(ethereum_account_address, web3):
     return web3.eth.getTransactionCount(ethereum_account_address) + 1
@@ -30,7 +31,7 @@ def rebalance(limit_lower, base_lower, strategy, web3, keeper, pk):
 
     signed_tx = web3.eth.account.sign_transaction(tx, private_key = pk)
     tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash, timeout=TIMEOUT_WAIT_TRANSACTION)
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash, timeout=TIMEOUT_WAIT_TRANSACTION, poll_latency=TRANSACTION_POLL_LATENCY)
 
     estimation = strategy.functions.setLimitThreshold(limit_lower).estimateGas({'from': keeper})
     print('setLimitThreshold, gas estimate: ', estimation)
@@ -44,7 +45,7 @@ def rebalance(limit_lower, base_lower, strategy, web3, keeper, pk):
     })
     signed_tx = web3.eth.account.sign_transaction(tx, private_key = pk)
     tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash, timeout=TIMEOUT_WAIT_TRANSACTION)
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash, timeout=TIMEOUT_WAIT_TRANSACTION, poll_latency=TRANSACTION_POLL_LATENCY)
 
     estimation = strategy.functions.rebalance().estimateGas({'from': keeper})
     print('Rebalance, gas estimate: ', estimation)
@@ -58,7 +59,7 @@ def rebalance(limit_lower, base_lower, strategy, web3, keeper, pk):
     })
     signed_tx = web3.eth.account.sign_transaction(tx, private_key = pk)
     tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash, timeout=TIMEOUT_WAIT_TRANSACTION)
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash, timeout=TIMEOUT_WAIT_TRANSACTION, poll_latency=TRANSACTION_POLL_LATENCY)
 
     print('Rebalance successful, transaction: ', tx_receipt)
 
