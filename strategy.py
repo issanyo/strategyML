@@ -62,7 +62,7 @@ def rebalance(limit_lower, base_lower, strategy, web3, keeper, pk, legacyGasPric
         'nonce': get_nonce(keeper, web3)
     }
     if legacyGasPrice:
-        transaction_data["gasPrice"]= 200000000
+        transaction_data["gasPrice"]= 20000000000
     else:
         transaction_data["maxFeePerGas"] = (priority + estimation) * 2,
         transaction_data["maxPriorityFeePerGas"] = priority + estimation
@@ -83,7 +83,7 @@ def rebalance(limit_lower, base_lower, strategy, web3, keeper, pk, legacyGasPric
         'nonce': get_nonce(keeper, web3)
     }
     if legacyGasPrice:
-        transaction_data["gasPrice"] = 200000000
+        transaction_data["gasPrice"] = 20000000000
     else:
         transaction_data["maxFeePerGas"] = (priority + estimation) * 2,
         transaction_data["maxPriorityFeePerGas"] = priority + estimation
@@ -103,7 +103,7 @@ def rebalance(limit_lower, base_lower, strategy, web3, keeper, pk, legacyGasPric
         'nonce': get_nonce(keeper, web3)
     }
     if legacyGasPrice:
-        transaction_data["gasPrice"] = 200000000
+        transaction_data["gasPrice"] = 20000000000
     else:
         transaction_data["maxFeePerGas"] = (priority + estimation) * 2,
         transaction_data["maxPriorityFeePerGas"] = priority + estimation
