@@ -51,7 +51,10 @@ def fetch_and_rebalance(network, keeper, pk, legacy_gas=False):
 
         cur = con.cursor()
 
-        last_rebalance = get_last_rebalance(cur, network) or datetime.now()
+        last_rebalance = get_last_rebalance(cur, network)
+        print("Last rebalance: ", last_rebalance)
+        if not last_rebalance:
+            last_rebalance = datetime.now()
         timestamp = datetime.now()
 
         rebalance_check = False
@@ -73,7 +76,6 @@ def get_last_rebalance(cur, network):
         cur.execute("SELECT rebalance_timestamp FROM keeperbot_data WHERE rebalance_timestamp IS NOT NULL AND network = '" + network + "'  ORDER BY timestamp DESC LIMIT 1")
         last_rebalance = cur.fetchone()[0]
 
-        last_rebalance = last_rebalance.replace(tzinfo=None)
     except Exception as e:
         print(e)
         last_rebalance = None
