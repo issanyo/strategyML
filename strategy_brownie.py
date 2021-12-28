@@ -55,7 +55,7 @@ def fetch_and_rebalance(network, keeper, pk, legacy_gas=False):
         timestamp = datetime.now()
 
         rebalance_check = False
-        if timestamp - last_rebalance > timedelta(hours=48):
+        if timestamp - last_rebalance > timedelta(hours=40):
             rebalance(theGraphData['limit_lower'], theGraphData['base_lower'], strategy, keeper, pk)
             last_rebalance = timestamp
             rebalance_check = True
