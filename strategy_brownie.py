@@ -76,6 +76,7 @@ def get_last_rebalance(cur, network):
         cur.execute("SELECT rebalance_timestamp FROM keeperbot_data WHERE rebalance_timestamp IS NOT NULL AND network = '" + network + "'  ORDER BY timestamp DESC LIMIT 1")
         last_rebalance = cur.fetchone()[0]
 
+        last_rebalance = last_rebalance.replace(tzinfo=None)
     except Exception as e:
         print(e)
         last_rebalance = None
