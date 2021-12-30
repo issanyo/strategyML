@@ -38,7 +38,7 @@ def fetch_and_rebalance(network, keeper, pk, legacy_gas=False):
     print("deployer balance: ", deployer.balance())
 
     if legacy_gas:
-        gas_price(ExponentialScalingStrategy("1 gwei", "2 gwei"))
+        gas_price(ExponentialScalingStrategy("2 gwei", "10 gwei"))
     else:
         priority_fee("auto")
     gas_limit("auto")
