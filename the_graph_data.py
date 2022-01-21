@@ -61,26 +61,18 @@ def fetch_thegraph_data(strategy):
     tick_spacing = strategy.tickSpacing()
     print('tick_spacing is: ' + str(tick_spacing))
     tick = strategy.getTick()
+    price = (tick / (1 << 96))**2
     print('tick is: ' + str(tick))
     print(str(1.0001 ** tick))
 
-    base_lower_price = (1 - std_deviation) * data_df[['close']].iloc[-1]
-    limit_lower_price = (1 - std_deviation * 0.25) * data_df[['close']].iloc[-1]
+    base_lower_price = (1 - std_deviation) * price
+    limit_lower_price = (1 - std_deviation * 0.25) * price
 
-    print('data df close is: ' + str(data_df[['close']].iloc[-1]))
-    print('base_lower_price is ' + str(base_lower_price))
-    print('limit_lower_price is ' + str(limit_lower_price))
-
-    price_tick = math.log(1/data_df[['close']].iloc[-1] * 10e12, 1.0001)
     base_lower_tick = math.log(1/base_lower_price * 10e12, 1.0001)
     limit_lower_tick = math.log(1/limit_lower_price * 10e12, 1.0001)
 
-    print('tick is ' + str(price_tick))
-    print('base_lower_tick is ' + str(base_lower_tick))
-    print('limit_lower_tick is ' + str(limit_lower_tick))
-    base_width =  base_lower_tick - price_tick
-    limit_width = limit_lower_tick - price_tick
-
+    base_width =  base_lower_tick - tick
+    limit_width = limit_lower_tick - tick
 
     base_width = int(math.ceil(int(base_width) / tick_spacing)) * tick_spacing
     limit_width = int(math.ceil(int(limit_width) / tick_spacing)) * tick_spacing
