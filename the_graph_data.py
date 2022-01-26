@@ -3,11 +3,7 @@ import time
 import requests
 import pandas as pd
 import numpy as np
-from brownie import (
-    accounts,
-    project,
-    Contract
-)
+
 
 def fetch_thegraph_data(strategy):
 
@@ -71,8 +67,8 @@ def fetch_thegraph_data(strategy):
     base_lower_price = (1 - std_deviation) * price
     limit_lower_price = (1 - std_deviation * 0.25) * price
     
-    print("base lower width ", price - base_lower_price)
-    print("limit lower with ", price - limit_lower_price)
+    print("base lower % width ", (price - base_lower_price)/price)
+    print("limit lower % width ", (price - limit_lower_price)/price)
     
     print("base_lower_price ", base_lower_price)
     print("limit_lower_price ", limit_lower_price)
