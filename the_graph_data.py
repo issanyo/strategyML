@@ -89,7 +89,7 @@ def fetch_thegraph_data(strategy):
     print('base_width is ' + str(base_width))
     print('limit_width is ' + str(limit_width))
     
-    """
+    
     final_data_dict = {
         'priceGraph': last_row['close'],
         'volume': last_row['volumeUSD'],
@@ -98,9 +98,7 @@ def fetch_thegraph_data(strategy):
         'limit_lower': limit_width,
         'base_lower': base_width,
     }
-    """
     
-    final_data_dict = {}
     
     return final_data_dict
 
