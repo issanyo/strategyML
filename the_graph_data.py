@@ -60,7 +60,7 @@ def fetch_thegraph_data(strategy):
     tick_spacing = strategy.tickSpacing() 
     print('tick_spacing is: ' + str(tick_spacing))
     tick = strategy.getTwap()     
-    price  = int(1.0001**(tick))/1e12
+    price  = int((1.0001**(tick))*1e12)
     print('tick is: ' + str(tick))
     print('price is: ', price)
 
@@ -73,8 +73,8 @@ def fetch_thegraph_data(strategy):
     print("base_lower_price ", base_lower_price)
     print("limit_lower_price ", limit_lower_price)
 
-    base_lower_tick = int(math.log(base_lower_price * 1e12, 1.0001))
-    limit_lower_tick = int(math.log(limit_lower_price * 1e12, 1.0001))
+    base_lower_tick = int(math.log(base_lower_price / 1e12, 1.0001))
+    limit_lower_tick = int(math.log(limit_lower_price / 1e12, 1.0001))
 
     print('tick is ' + str(tick))
     print('base_lower_tick is ' + str(base_lower_tick))
