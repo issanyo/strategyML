@@ -1,0 +1,6 @@
+eth-brownie
+pandas
+pymongo
+tensorflow
+numpy
+gym

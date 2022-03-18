@@ -1,4 +1,4 @@
-# .github/workflows/scheduled-builds.yml
+# actionsgithub/workflows/scheduled-builds.yml
 name: Trigger data fetching from contract on a CRON Schedule
 
 on:
