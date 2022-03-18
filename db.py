@@ -9,7 +9,7 @@ def get_db():
     return client.uniswap
 
 
-def insert_data(vault_data, env: PriceEnv, action: int, future_action: int, new_state, reward_env, collectFees, gas_used, network="polygon"):
+def insert_data(vault_data, env: PriceEnv, action: int, future_action: int, new_state, reward_env, collectFees, gas_used, network):
     db = get_db()
     data = {
         "vault": {

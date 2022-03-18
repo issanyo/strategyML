@@ -8,10 +8,13 @@ from strategy import rebalance
 from brownie import network
 import numpy as np
 
-def main():
+
+def main(vault_address, strategy_address, network_, legacy_gas):
+    network.connect(network_)
+
     model = load_model()
-    vault = get_vault("0x34b97ffa01dc0DC959c5f1176273D0de3be914C1")
-    strategy = get_strategy("0x741e3E1f81041c62C2A97d0b6E567AcaB09A6232")
+    vault = get_vault(vault_address)
+    strategy = get_strategy(strategy_address)
     tokens = get_tokens(vault)
     curr_vault_data = get_vault_data(vault, strategy, tokens)
     last_predicted_action = get_config("future_action") or 0
@@ -42,7 +45,7 @@ def main():
         base = calculate_tick_for_range(env.current_action_range_val(), strategy, tokens)
         limit = calculate_tick_for_range(env.current_action_range_val() * 0.75, strategy, tokens)
 
-        tx = rebalance(strategy, base, limit, os.environ['STRATEGY_PK'], True) # TODO: remove legacy gas
+        tx = rebalance(strategy, base, limit, os.environ['STRATEGY_PK'], legacy_gas)
 
         gas_used = tx.gas_used
         #print(tx.info())
@@ -56,9 +59,6 @@ def main():
 
     vault_data = get_vault_data(vault, strategy, tokens)
 
-    insert_data(vault_data, env, last_predicted_action, predicted_action, new_state, reward, collectFees, gas_used)
+    insert_data(vault_data, env, last_predicted_action, predicted_action, new_state, reward, collectFees, gas_used, network_)
 
-
-network.connect('development')
-main()
-network.disconnect()
+    network.disconnect()
