@@ -37,7 +37,7 @@ def get_vault_data(vault, strategy, tokens):
     data['tick'] = tick
     data['price'] = price
 
-    data['tvl'] = data['price'] * data['total1']
+    data['tvl'] = data['total0'] + data['price'] * data['total1']
 
     print(data)
 

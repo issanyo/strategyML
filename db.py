@@ -9,7 +9,7 @@ def get_db():
     return client.uniswap
 
 
-def insert_data(vault_data, env: PriceEnv, action: int, reward_env, collectFees, gas_used, network="polygon"):
+def insert_data(vault_data, env: PriceEnv, action: int, future_action: int, new_state, reward_env, collectFees, gas_used, network="polygon"):
     db = get_db()
     data = {
         "vault": {
@@ -28,18 +28,25 @@ def insert_data(vault_data, env: PriceEnv, action: int, reward_env, collectFees,
         "env": {
             "range": env.current_action_range_val(),
             "action": action,
-            "reward": reward_env
+            "reward": reward_env,
+            "state": new_state
         },
         "network": network,
         "datetime": datetime.utcnow()
     }
     strategy_ = db["strategy"]
     result = strategy_.insert_one(data)
+
+    strategy_temp_data = db["strategy_config"]
+    strategy_temp_data.update_one({"name": "future_action"},
+                                  {"$set": {"value": future_action, "name": "future_action", "datetime": datetime.utcnow()}},
+                                  upsert=True)
+
     print("data inserted on db")
     return result
 
 
-def get_state(lookback, env):
+def get_state(lookback, env: PriceEnv):
     from_date = datetime.utcnow() - timedelta(hours=lookback*2)
 
     db = get_db()
@@ -56,3 +63,10 @@ def get_state(lookback, env):
         counter += 1
 
     return state[-lookback:]
+
+
+def get_config(name):
+    db = get_db()
+    strategy_temp_data = db["strategy_config"]
+    config = strategy_temp_data.find_one({"name": name})
+    return config["value"] if config else None
