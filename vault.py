@@ -55,7 +55,7 @@ def to_price(tick, tokens):
     decimal0 = tokens[0].decimals()
     decimal1 = tokens[1].decimals()
 
-    return (1.0001 ** tick) * (10 ** (-1 * abs(decimal0 - decimal1)))
+    return 1/((1.0001 ** tick) * (10 ** (-1 * abs(decimal0 - decimal1))))
 
 
 def calculate_tick_for_range(range, strategy, tokens):
@@ -73,7 +73,7 @@ def to_tick(price, tokens):
     decimal0 = tokens[0].decimals()
     decimal1 = tokens[1].decimals()
 
-    tick = math.log(price / (10 ** (-1 * abs(decimal0 - decimal1))), 1.0001)
+    tick = math.log(1 / price / (10 ** (-1 * abs(decimal0 - decimal1))), 1.0001)
 
     return int(tick)
 
