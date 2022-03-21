@@ -1,8 +1,9 @@
 from pymongo import MongoClient
 from datetime import timedelta, datetime
-
+import psycopg2
 from ml.env import PriceEnv
-
+from psycopg2.extensions import AsIs
+import os
 
 def get_db():
     client = MongoClient()
@@ -42,6 +43,13 @@ def insert_data(vault_data, env: PriceEnv, action: int, future_action: int, new_
                                   {"$set": {"value": future_action, "name": "future_action", "datetime": datetime.utcnow()}},
                                   upsert=True)
 
+    postgress_data = data["vault"]
+    del postgress_data["collectFees"]
+    del postgress_data["tick"]
+    postgress_data["datetime"] = data["datetime"]
+    postgress_data["tvl_holding"] = 100 + 0.035 * postgress_data['price']
+    insert_data_postgress(postgress_data)
+
     print("data inserted on db")
     return result
 
@@ -70,3 +78,23 @@ def get_config(name):
     strategy_temp_data = db["strategy_config"]
     config = strategy_temp_data.find_one({"name": name})
     return config["value"] if config else None
+
+
+def insert_data_postgress(data):
+    user = os.environ['DB_USER']
+    pwd = os.environ['DB_PASS']
+    con = psycopg2.connect("dbname='uniswap' user='" + user + "' host='localhost' password='" + pwd + "'")
+    cur = con.cursor()
+
+    insert_statement = 'insert into strategy (%s) values %s'
+    columns = data.keys()
+    values = [data[column] for column in columns]
+
+    try:
+        cur.execute(insert_statement, (AsIs(','.join(columns)), tuple(values)))
+        con.commit()
+    except psycopg2.Error as e:
+        print(e)
+        con.rollback()
+
+    con.close()

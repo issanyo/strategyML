@@ -4,3 +4,4 @@ pymongo
 tensorflow
 numpy
 gym
+psycopg2-binary
