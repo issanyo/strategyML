@@ -26,7 +26,11 @@ def insert_data(vault_data, env: PriceEnv, action: int, future_action: int, new_
             "price": vault_data['price'],
             "tvl": vault_data['tvl'],
             "gas_used": gas_used,
-            "collectFees": collectFees
+            "collectFees": collectFees,
+            "total0_limit": vault_data['total0_limit'],
+            "total1_limit": vault_data['total1_limit'],
+            "total0_base": vault_data['total0_base'],
+            "total1_base": vault_data['total1_base'],
         },
         "env": {
             "range": env.current_action_range_val(),
