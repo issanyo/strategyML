@@ -128,16 +128,18 @@ class PriceEnv(gym.Env):
 
 
 def prepare_bounds_for_env(data):
-    lower_bound = data["baseLower"]
-    upper_bound = data["baseUpper"]
+    lower_base = min(data["baseLower"], data["baseUpper"])
+    upper_base = max(data["baseLower"], data["baseUpper"])
 
-    if data["token0_quantity"] <= 0.01 or data["token1_quantity"] <= 1e-10:
-        # use limit because we are unbalanced
-        lower_bound = data["limitLower"]
-        upper_bound = data["limitUpper"]
+    lower_limit = min(data["limitLower"], data["limitUpper"])
+    upper_limit = max(data["limitLower"], data["limitUpper"])
 
-    if lower_bound > upper_bound:
-        tmp = lower_bound
-        lower_bound = upper_bound
-        upper_bound = tmp
+    #if data["token0_quantity"] <= 0.01 or data["token1_quantity"] <= 1e-10:
+    #    # use limit because we are unbalanced
+    #    lower_bound = data["limitLower"]
+    #    upper_bound = data["limitUpper"]
+
+    lower_bound = min(lower_base, lower_limit)
+    upper_bound = max(upper_base, upper_limit)
+
     return [math.floor(lower_bound), math.ceil(upper_bound)]
