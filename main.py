@@ -43,11 +43,11 @@ def main(vault_address, strategy_address, network_, legacy_gas):
     gas_used = 0
     if predicted_action != 0:
         base = calculate_tick_for_range(env.current_action_range_val(), strategy, tokens)
-        limit = calculate_tick_for_range(env.current_action_range_val() * 0.75, strategy, tokens)
+        limit = calculate_tick_for_range(env.current_action_range_val() * 0.5, strategy, tokens)
 
         tx = rebalance(strategy, base, limit, os.environ['STRATEGY_PK'], legacy_gas)
 
-        gas_used = tx.gas_used
+        gas_used = tx.gas_used * tx.priority_fee
         #print(tx.info())
         collectFees = [
             {"feesToVault0": tx.events["CollectFees"][0]["feesToVault0"], "feesToVault1": tx.events["CollectFees"][0]["feesToVault1"]},
