@@ -31,6 +31,9 @@ def get_vault_data(vault, strategy, tokens):
     data['limitLower'] = to_price(vault.limitLower(), tokens)
     data['limitUpper'] = to_price(vault.limitUpper(), tokens)
 
+    data['total0_limit'], data['total1_limit'] = vault.getPositionAmounts(vault.limitLower(), vault.limitUpper())
+    data['total0_base'], data['total1_base'] = vault.getPositionAmounts(vault.baseLower(), vault.baseUpper())
+
     #data['outstandingShares'] = vault.totalSupply()
 
     tick, price = get_tick_price(strategy, tokens)

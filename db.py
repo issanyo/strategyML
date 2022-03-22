@@ -48,6 +48,10 @@ def insert_data(vault_data, env: PriceEnv, action: int, future_action: int, new_
     postgress_data = data["vault"]
     del postgress_data["collectFees"]
     del postgress_data["tick"]
+    del postgress_data["total0_limit"]
+    del postgress_data["total1_limit"]
+    del postgress_data["total0_base"]
+    del postgress_data["total1_base"]
     postgress_data["datetime"] = data["datetime"]
     postgress_data["tvl_holding"] = 100 + 0.035 * postgress_data['price']
     insert_data_postgress(postgress_data)

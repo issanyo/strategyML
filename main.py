@@ -26,8 +26,6 @@ def main(vault_address, strategy_address, network_, legacy_gas):
     # Update environment with latest data
     tick, price = get_tick_price(strategy, tokens)
     env.add_price(int(price))
-    env.il = [curr_vault_data["total0"], curr_vault_data["total1"]] # todo: remove this? already updated from last setp
-    env.assets_price = curr_vault_data["tvl"]
 
     new_state, reward, done, _ = env.step(last_predicted_action)
     state.append(new_state)
@@ -43,7 +41,7 @@ def main(vault_address, strategy_address, network_, legacy_gas):
     gas_used = 0
     if predicted_action != 0:
         base = calculate_tick_for_range(env.current_action_range_val(), strategy, tokens)
-        limit = calculate_tick_for_range(env.current_action_range_val() * 0.5, strategy, tokens)
+        limit = calculate_tick_for_range(env.current_action_range_val(), strategy, tokens)
 
         tx = rebalance(strategy, base, limit, os.environ['STRATEGY_PK'], legacy_gas)
 
