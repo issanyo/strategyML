@@ -47,7 +47,7 @@ def main(vault_address, strategy_address, network_, legacy_gas):
 
         tx = rebalance(strategy, base, limit, os.environ['STRATEGY_PK'], legacy_gas)
 
-        gas_used = tx.gas_used * tx.priority_fee
+        gas_used = np.round(tx.gas_used * tx.priority_fee * 1e-18, 9).item()# gas in Matic
         #print(tx.info())
         collectFees = [
             {"feesToVault0": tx.events["CollectFees"][0]["feesToVault0"], "feesToVault1": tx.events["CollectFees"][0]["feesToVault1"]},
