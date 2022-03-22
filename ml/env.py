@@ -131,7 +131,7 @@ def prepare_bounds_for_env(data):
     lower_bound = data["baseLower"]
     upper_bound = data["baseUpper"]
 
-    if data["total0"] <= 0.01 or data["total1"] <= 1e-10:
+    if data["token0_quantity"] <= 0.01 or data["token1_quantity"] <= 1e-10:
         # use limit because we are unbalanced
         lower_bound = data["limitLower"]
         upper_bound = data["limitUpper"]
