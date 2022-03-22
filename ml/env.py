@@ -1,3 +1,5 @@
+import math
+
 import numpy as np
 import gym
 
@@ -111,15 +113,31 @@ class PriceEnv(gym.Env):
     def current_price(self):
         return self.prices[self.price_index]
 
-    def reset_status_and_price(self, price, il, range_val, lower_bound, upper_bound):
+    def reset_status_and_price(self, price, il, range_val, last_action_price):
         self.prices = [price]
         self.price_index = 0
         self.intial_price = self.price_index
         self.current_action_range = PriceEnv.RANGES.index(range_val)
-        self.last_action_price = [lower_bound, upper_bound]
+        self.last_action_price = last_action_price
         self.il = il
         self.assets_price = self.il[0] + self.il[1] * self.current_price()
         return [0, self.current_action_range_val(), 0, 0]
 
     def add_price(self, price):
         self.prices.append(price)
+
+
+def prepare_bounds_for_env(data):
+    lower_bound = data["baseLower"]
+    upper_bound = data["baseUpper"]
+
+    if data["total0"] <= 0.01 or data["total1"] <= 1e-10:
+        # use limit because we are unbalanced
+        lower_bound = data["limitLower"]
+        upper_bound = data["limitUpper"]
+
+    if lower_bound > upper_bound:
+        tmp = lower_bound
+        lower_bound = upper_bound
+        upper_bound = tmp
+    return [math.floor(lower_bound), math.ceil(upper_bound)]

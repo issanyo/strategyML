@@ -21,12 +21,12 @@ def main(vault_address, strategy_address, network_, legacy_gas):
 
     env = PriceEnv([0])
     env.seed(0)
-    state = get_state(LOOKBACK-1, env, curr_vault_data)
+    state = get_state(LOOKBACK-1, env)
 
     # Update environment with latest data
     tick, price = get_tick_price(strategy, tokens)
     env.add_price(int(price))
-    env.il = [curr_vault_data["total0"], curr_vault_data["total1"]]
+    env.il = [curr_vault_data["total0"], curr_vault_data["total1"]] # todo: remove this? already updated from last setp
     env.assets_price = curr_vault_data["tvl"]
 
     new_state, reward, done, _ = env.step(last_predicted_action)
