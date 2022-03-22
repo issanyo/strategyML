@@ -21,7 +21,7 @@ def main(vault_address, strategy_address, network_, legacy_gas):
 
     env = PriceEnv([0])
     env.seed(0)
-    state = get_state(LOOKBACK-1, env)
+    state = get_state(LOOKBACK-1, env, curr_vault_data)
 
     # Update environment with latest data
     tick, price = get_tick_price(strategy, tokens)

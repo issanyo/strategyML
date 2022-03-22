@@ -90,7 +90,7 @@ class PriceEnv(gym.Env):
         self.__update_last_action_price()
         self.il = [self.current_price(), 1]
         self.assets_price = self.il[0] + self.il[1] * self.current_price()
-        return [0, self.__update_last_action_price(), 0, 0]
+        return [0, self.current_action_range_val(), 0, 0]
 
     def seed(self, seed):
         self.price_index = seed
@@ -99,7 +99,7 @@ class PriceEnv(gym.Env):
         self.__update_last_action_price()
         self.il = [self.current_price(), 1]
         self.assets_price = self.il[0] + self.il[1] * self.current_price()
-        return [0, self.__update_last_action_price(), 0, 0]
+        return [0, self.current_action_range_val(), 0, 0]
 
     def __update_last_action_price(self):
         self.last_action_price = [max(0, self.prices[self.price_index] - 1 - self.current_action_range_val()),
@@ -111,15 +111,15 @@ class PriceEnv(gym.Env):
     def current_price(self):
         return self.prices[self.price_index]
 
-    def reset_status_and_price(self, price, il, range_val):
+    def reset_status_and_price(self, price, il, range_val, lower_bound, upper_bound):
         self.prices = [price]
         self.price_index = 0
         self.intial_price = self.price_index
         self.current_action_range = PriceEnv.RANGES.index(range_val)
-        self.__update_last_action_price()
+        self.last_action_price = [lower_bound, upper_bound]
         self.il = il
         self.assets_price = self.il[0] + self.il[1] * self.current_price()
-        return [0, self.__update_last_action_price(), 0, 0]
+        return [0, self.current_action_range_val(), 0, 0]
 
     def add_price(self, price):
         self.prices.append(price)

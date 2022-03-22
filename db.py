@@ -54,8 +54,21 @@ def insert_data(vault_data, env: PriceEnv, action: int, future_action: int, new_
     return result
 
 
-def get_state(lookback, env: PriceEnv):
+def get_state(lookback, env: PriceEnv, vault_data):
     from_date = datetime.utcnow() - timedelta(hours=lookback*2)
+
+    lower_bound = vault_data["baseLower"]
+    upper_bound = vault_data["baseUpper"]
+
+    if vault_data["total0"] <= 0.01 or vault_data["total1"] <= 1e-10:
+        # use limit because we are unbalanced
+        lower_bound = vault_data["limitLower"]
+        upper_bound = vault_data["limitUpper"]
+
+    if lower_bound > upper_bound:
+        tmp = lower_bound
+        lower_bound = upper_bound
+        upper_bound = tmp
 
     db = get_db()
     state = []
@@ -66,7 +79,7 @@ def get_state(lookback, env: PriceEnv):
             curr_state, reward, done, _ = env.step(data["env"]["action"])
             state.append(curr_state)
 
-        env.reset_status_and_price(int(data["vault"]["price"]), [data["vault"]["token0_quantity"], data["vault"]["token1_quantity"]], data["env"]["range"])
+        env.reset_status_and_price(int(data["vault"]["price"]), [data["vault"]["token0_quantity"], data["vault"]["token1_quantity"]], data["env"]["range"], lower_bound, upper_bound)
 
         counter += 1
 
