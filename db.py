@@ -7,12 +7,15 @@ from ml.env import PriceEnv, prepare_bounds_for_env
 from psycopg2.extensions import AsIs
 import os
 
+from vault import calculate_tvl
+
+
 def get_db():
     client = MongoClient()
     return client.uniswap
 
 
-def insert_data(vault_data, env: PriceEnv, action: int, future_action: int, new_state, reward_env, collectFees, gas_used, network):
+def insert_data(vault_data, env: PriceEnv, action: int, future_action: int, new_state, reward_env, collectFees, gas_used, network, tokens):
     db = get_db()
     data = {
         "vault": {
@@ -49,15 +52,24 @@ def insert_data(vault_data, env: PriceEnv, action: int, future_action: int, new_
                                   {"$set": {"value": future_action, "name": "future_action", "datetime": datetime.utcnow()}},
                                   upsert=True)
 
-    postgress_data = data["vault"]
-    del postgress_data["collectFees"]
-    del postgress_data["tick"]
-    del postgress_data["total0_limit"]
-    del postgress_data["total1_limit"]
-    del postgress_data["total0_base"]
-    del postgress_data["total1_base"]
-    postgress_data["datetime"] = data["datetime"]
-    postgress_data["tvl_holding"] = 100 + 0.035 * postgress_data['price']
+    postgress_data = {
+        "token0_quantity": vault_data['total0'],
+        "token1_quantity": vault_data['total1'],
+        "baseLower": vault_data['baseLower'],
+        "baseUpper": vault_data['baseUpper'],
+        "limitLower": vault_data['limitLower'],
+        "limitUpper": vault_data['limitUpper'],
+        "price": vault_data['price'],
+        "tvl": vault_data['tvl'],
+        "gas_used": gas_used,
+        "datetime": data["datetime"],
+        "tvl_holding": 100 + 0.035 * vault_data['price']
+    }
+    if len(collectFees) > 0:
+        postgress_data["collectFeesBase"] = calculate_tvl(collectFees[0]["feesToVault0"], collectFees[0]["feesToVault1"], vault_data['price'], tokens)
+    if len(collectFees) > 1:
+        postgress_data["collectFeesLimit"] = calculate_tvl(collectFees[1]["feesToVault0"], collectFees[1]["feesToVault1"], vault_data['price'], tokens)
+
     insert_data_postgress(postgress_data)
 
     print("data inserted on db")

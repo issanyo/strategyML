@@ -84,3 +84,9 @@ def to_tick(price, tokens):
 def normalize_tick(tick, strategy):
     tick_spacing = strategy.tickSpacing()
     return int(math.ceil(tick / tick_spacing)) * tick_spacing
+
+
+def calculate_tvl(extended_total0, extended_total1, price, tokens):
+    total0 = extended_total0 * (10 ** (-1 * tokens[0].decimals()))
+    total1 = extended_total1 * (10 ** (-1 * tokens[1].decimals()))
+    return total0 + price * total1

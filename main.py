@@ -57,6 +57,6 @@ def main(vault_address, strategy_address, network_, legacy_gas):
 
     vault_data = get_vault_data(vault, strategy, tokens)
 
-    insert_data(vault_data, env, last_predicted_action, predicted_action, new_state, reward, collectFees, gas_used, network_)
+    insert_data(vault_data, env, last_predicted_action, predicted_action, new_state, reward, collectFees, gas_used, network_, tokens)
 
     network.disconnect()
