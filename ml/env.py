@@ -52,7 +52,7 @@ class PriceEnv(gym.Env):
 
         price_difference = 0
         # In range price
-        if lower_bound <= new_price <= upper_bound and self.il[0] > 0 and self.il[1] > 0:
+        if lower_bound <= new_price <= upper_bound:
             given_range = upper_bound - lower_bound
 
             reward += 1 / given_range if given_range > 0 else 0.5
