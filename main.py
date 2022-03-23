@@ -41,7 +41,7 @@ def main(vault_address, strategy_address, network_, legacy_gas):
     gas_used = 0
     if predicted_action != 0:
         base = calculate_tick_for_range(env.current_action_range_val(), strategy, tokens)
-        limit = calculate_tick_for_range(env.current_action_range_val(), strategy, tokens)
+        limit = calculate_tick_for_range(env.current_action_range_val() * 2, strategy, tokens)
 
         tx = rebalance(strategy, base, limit, os.environ['STRATEGY_PK'], legacy_gas)
 
