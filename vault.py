@@ -33,6 +33,10 @@ def get_vault_data(vault, strategy, tokens):
 
     data['total0_limit'], data['total1_limit'] = vault.getPositionAmounts(vault.limitLower(), vault.limitUpper())
     data['total0_base'], data['total1_base'] = vault.getPositionAmounts(vault.baseLower(), vault.baseUpper())
+    data['total0_limit'] *= (10 ** (-1 * tokens[0].decimals()))
+    data['total0_base'] *= (10 ** (-1 * tokens[0].decimals()))
+    data['total1_limit'] *= (10 ** (-1 * tokens[1].decimals()))
+    data['total1_base'] *= (10 ** (-1 * tokens[1].decimals()))
 
     #data['outstandingShares'] = vault.totalSupply()
 
