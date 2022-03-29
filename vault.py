@@ -94,3 +94,10 @@ def calculate_tvl(extended_total0, extended_total1, price, tokens):
     total0 = extended_total0 * (10 ** (-1 * tokens[0].decimals()))
     total1 = extended_total1 * (10 ** (-1 * tokens[1].decimals()))
     return total0 + price * total1
+
+
+def getSqrtRatioAtTick(tick):
+    """
+    Calculates sqrt(1.0001^tick) * 2^96
+    """
+    return math.sqrt(1.0001 ** tick) * 2 ** 96
