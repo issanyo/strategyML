@@ -6,7 +6,8 @@ import gym
 
 class PriceEnv(gym.Env):
     RANGE_FACTOR = 2
-    RANGES = [10, 20, 30, 40, 60, 80, 100, 150, 200, 300, 400, 500, 700, 900]
+    RANGES = [0, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 110, 120, 130, 140, 150, 200, 300, 400, 500]
+    POOL_FEE = 0.05 / 100
 
     def __init__(self, prices):
         """
@@ -21,6 +22,13 @@ class PriceEnv(gym.Env):
         self.observation_space = gym.spaces.Box(low=np.array([-1000., 10, 0, 0]), high=np.array([1000., 900, 10000, 1]))
         self.prices = prices
         # need to call reset or seed
+
+    def swap(self, percentage, buy, price):
+        assets = self.il[0] + self.il[1] * price
+        curr_percentage = self.il[0] / assets
+        curr_percentage += -percentage / 2 if buy else percentage / 2
+        self.il[0] = assets * curr_percentage
+        self.il[1] = assets * (1 - curr_percentage) / price
 
     def step(self, action):
 
@@ -45,32 +53,37 @@ class PriceEnv(gym.Env):
             self.il[0] = assets / 2
             self.il[1] = assets / 2 / self.current_price()
 
+            self.il[0] -= PriceEnv.POOL_FEE * self.il[0]
+            self.il[1] -= PriceEnv.POOL_FEE * self.il[1]
+
         new_price = self.prices[self.price_index + 1]
         lower_bound = self.last_action_price[0]
         upper_bound = self.last_action_price[1]
         center = (lower_bound + upper_bound) / 2
 
         price_difference = 0
-        # In range price
-        if lower_bound <= new_price <= upper_bound:
-            given_range = upper_bound - lower_bound
+        given_range = upper_bound - lower_bound
 
-            reward += 1 / given_range if given_range > 0 else 0.5
+        if self.current_action_range > 0 and given_range > 0 and self.il[0] > 0 and self.il[1] > 0:
+            # In range price
+            if lower_bound <= new_price <= upper_bound:
+                reward += 1 / given_range
 
-            # IL
+                # IL
+                movement_in_range = abs(new_price - old_price) / (given_range / 2)
 
-            # this is an aproximation, need to be checked again
-            quantity_used_token0 = reward * new_price
-            quantity_used_token1 = reward
+                self.swap(movement_in_range, old_price > new_price, new_price)
 
-            if old_price > new_price:
-                # price decrease, more token
-                self.il[0] -= quantity_used_token0
-                self.il[1] += quantity_used_token1
             else:
-                # price increase, more fiat
-                self.il[0] += quantity_used_token0
-                self.il[1] -= quantity_used_token1
+                # outside given range, used all liquidity
+                if new_price < lower_bound:
+                    # price decrease, more token
+                    self.il[1] += self.il[0] / new_price
+                    self.il[0] = 0
+                else:
+                    # price increase, more fiat
+                    self.il[0] += self.il[1] * new_price
+                    self.il[1] = 0
 
         self.price_index += 1
 
@@ -82,13 +95,12 @@ class PriceEnv(gym.Env):
         il_difference = (new_assets_price - old_assets_price) * 0.01
 
         info = {}
-        #return np.around([price_difference, self.current_action_range_val(), il_difference, reward - fees], decimals=4), il_difference + reward - fees, done, info
         return [price_difference, self.current_action_range_val(), il_difference, reward - fees], il_difference + reward - fees, done, info
 
     def reset(self):
         self.price_index = len(self.prices) - 10000
         self.intial_price = self.price_index
-        self.current_action_range = 0
+        self.current_action_range = 1
         self.__update_last_action_price()
         self.il = [self.current_price(), 1]
         self.assets_price = self.il[0] + self.il[1] * self.current_price()
@@ -97,7 +109,7 @@ class PriceEnv(gym.Env):
     def seed(self, seed):
         self.price_index = seed
         self.intial_price = self.price_index
-        self.current_action_range = 0
+        self.current_action_range = 1
         self.__update_last_action_price()
         self.il = [self.current_price(), 1]
         self.assets_price = self.il[0] + self.il[1] * self.current_price()

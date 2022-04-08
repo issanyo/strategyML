@@ -7,7 +7,7 @@ options.experimental_distribute.auto_shard_policy = tf.data.experimental.AutoSha
 LOOKBACK = 12
 
 def load_model():
-    return tf.keras.models.load_model('./ml/proximal_policy_optimization_actor_1600')
+    return tf.keras.models.load_model('./ml/lookback_12_target0001_clip02_max')
 
 def predict(model, state):
     state = tf.data.Dataset.from_tensors(state)
