@@ -4,10 +4,10 @@ import tensorflow as tf
 # Disable AutoShard.
 options = tf.data.Options()
 options.experimental_distribute.auto_shard_policy = tf.data.experimental.AutoShardPolicy.OFF #AutoShardPolicy.DATA
-LOOKBACK = 12
+LOOKBACK = 6
 
 def load_model():
-    return tf.keras.models.load_model('./ml/lookback_12_target0001_clip02_max')
+    return tf.keras.models.load_model('./ml/lookback_6_target_kl0001_clip025_full')
 
 def predict(model, state):
     state = tf.data.Dataset.from_tensors(state)
