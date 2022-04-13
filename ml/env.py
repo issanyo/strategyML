@@ -23,12 +23,10 @@ class PriceEnv(gym.Env):
         self.prices = prices
         # need to call reset or seed
 
-    def swap(self, percentage, buy, price):
+    def swap(self, percentage_token0, price):
         assets = self.il[0] + self.il[1] * price
-        curr_percentage = self.il[0] / assets
-        curr_percentage += -percentage / 2 if buy else percentage / 2
-        self.il[0] = assets * curr_percentage
-        self.il[1] = assets * (1 - curr_percentage) / price
+        self.il[0] = assets * percentage_token0
+        self.il[1] = assets * (1 - percentage_token0) / price
 
     def step(self, action):
 
@@ -64,25 +62,25 @@ class PriceEnv(gym.Env):
         price_difference = 0
         given_range = upper_bound - lower_bound
 
-        if self.current_action_range > 0 and given_range > 0 and self.il[0] > 0 and self.il[1] > 0:
+        if self.current_action_range > 0 and given_range > 0:
             # In range price
             if lower_bound <= new_price <= upper_bound:
                 reward += 1 / given_range
 
                 # IL
-                movement_in_range = abs(new_price - old_price) / (given_range / 2)
+                # [10,0] p=6 -> 40% token1, 60% token0
 
-                self.swap(movement_in_range, old_price > new_price, new_price)
+                self.swap((new_price - lower_bound) / given_range, new_price)
 
-            else:
+            elif self.il[0] > 0 and self.il[1] > 0:
                 # outside given range, used all liquidity
                 if new_price < lower_bound:
                     # price decrease, more token
-                    self.il[1] += self.il[0] / new_price
+                    self.il[1] += self.il[0] / lower_bound
                     self.il[0] = 0
                 else:
                     # price increase, more fiat
-                    self.il[0] += self.il[1] * new_price
+                    self.il[0] += self.il[1] * upper_bound
                     self.il[1] = 0
 
         self.price_index += 1
@@ -102,7 +100,7 @@ class PriceEnv(gym.Env):
         self.intial_price = self.price_index
         self.current_action_range = 1
         self.__update_last_action_price()
-        self.il = [self.current_price(), 1]
+        self.il = [100, 100/self.current_price()]
         self.assets_price = self.il[0] + self.il[1] * self.current_price()
         return [0, self.current_action_range_val(), 0, 0]
 
@@ -111,7 +109,7 @@ class PriceEnv(gym.Env):
         self.intial_price = self.price_index
         self.current_action_range = 1
         self.__update_last_action_price()
-        self.il = [self.current_price(), 1]
+        self.il = [100, 100/self.current_price()]
         self.assets_price = self.il[0] + self.il[1] * self.current_price()
         return [0, self.current_action_range_val(), 0, 0]
 
