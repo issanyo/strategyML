@@ -19,7 +19,7 @@ def main(vault_address, strategy_address, network_, legacy_gas):
     curr_vault_data = get_vault_data(vault, strategy, tokens)
     last_predicted_action = get_config("future_action") or 0
 
-    env = PriceEnv([0])
+    env = PriceEnv([1])
     env.seed(0)
     state = get_state(LOOKBACK-1, env)
 
