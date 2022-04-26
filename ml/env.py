@@ -6,7 +6,7 @@ import gym
 
 class PriceEnv(gym.Env):
     RANGE_FACTOR = 2
-    RANGES = [0, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 110, 120, 130, 140, 150, 200, 300, 400, 500]
+    RANGES = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
     POOL_FEE = 0.05 / 100
 
     def __init__(self, prices):

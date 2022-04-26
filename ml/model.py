@@ -7,7 +7,7 @@ options.experimental_distribute.auto_shard_policy = tf.data.experimental.AutoSha
 LOOKBACK = 6
 
 def load_model():
-    return tf.keras.models.load_model('./ml/lookback_6_target_kl0001_clip025_full')
+    return tf.keras.models.load_model('./ml/lookback_6_64x64_kl0001_clip025_new_ranges_max')
 
 def predict(model, state):
     state = tf.data.Dataset.from_tensors(state)
