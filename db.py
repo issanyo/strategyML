@@ -9,6 +9,7 @@ import os
 
 from vault import calculate_tvl
 
+INVESTMENT = [100, 0.035]
 
 def get_db():
     client = MongoClient()
@@ -63,7 +64,7 @@ def insert_data(vault_data, env: PriceEnv, action: int, future_action: int, new_
         "tvl": vault_data['tvl'],
         "gas_used": gas_used,
         "datetime": data["datetime"],
-        "tvl_holding": 100 + 0.035 * vault_data['price']
+        "tvl_holding": INVESTMENT[0] + INVESTMENT[1] * vault_data['price']
     }
     if len(collectFees) > 0:
         postgress_data["collectFeesBase"] = calculate_tvl(collectFees[0]["feesToVault0"], collectFees[0]["feesToVault1"], vault_data['price'], tokens)
@@ -88,7 +89,7 @@ def get_state(lookback, env: PriceEnv):
             curr_state, reward, done, _ = env.step(data["env"]["action"])
             state.append(curr_state)
 
-        env.reset_status_and_price(int(data["vault"]["price"]), [data["vault"]["token0_quantity"], data["vault"]["token1_quantity"]], data["env"]["range"], prepare_bounds_for_env(data["vault"]))
+        env.reset_status_and_price(int(data["vault"]["price"]), [data["vault"]["token0_quantity"], data["vault"]["token1_quantity"]], data["env"]["range"], prepare_bounds_for_env(data["vault"]), INVESTMENT)
 
         counter += 1
 
