@@ -6,7 +6,7 @@ import gym
 
 class PriceEnv(gym.Env):
     RANGE_FACTOR = 2
-    RANGES = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
+    RANGES = [0, 0.025, 0.05, 0.075, 0.1, 0.15, 0.2, 0.3, 0.4, 0.6, 0.8]
     POOL_FEE = 0.05 / 100
 
     def __init__(self, prices):
@@ -37,7 +37,7 @@ class PriceEnv(gym.Env):
         old_assets_price = self.il[0] + self.il[1] * old_price
 
         if action != 0:
-            fees = 0.1  # fees for changing range
+            fees = 0.5
 
             if action == 1:  # increment
                 self.current_action_range = min(self.current_action_range + 1, len(PriceEnv.RANGES) - 1)
@@ -65,7 +65,7 @@ class PriceEnv(gym.Env):
         if self.current_action_range > 0 and given_range > 0:
             # In range price
             if lower_bound <= new_price <= upper_bound:
-                reward += 1 / given_range
+                reward += 0.025/ given_range
 
                 # IL
                 # [10,0] p=6 -> 40% token1, 60% token0
@@ -105,8 +105,10 @@ class PriceEnv(gym.Env):
         self.intial_price = self.price_index
         self.current_action_range = 1
         self.__update_last_action_price()
-        self.il = [100, 100/self.current_price()]
-        self.investment = [100, 100/self.current_price()]
+        # btc/eth
+        eth = 1
+        self.il = [eth, eth/self.current_price()]
+        self.investment = [eth, eth/self.current_price()]
         return [0, self.current_action_range_val(), 0, 0]
 
     def seed(self, seed):
@@ -114,13 +116,14 @@ class PriceEnv(gym.Env):
         self.intial_price = self.price_index
         self.current_action_range = 1
         self.__update_last_action_price()
-        self.il = [100, 100/self.current_price()]
-        self.investment = [100, 100/self.current_price()]
+        eth = 1
+        self.il = [eth, eth/self.current_price()]
+        self.investment = [eth, eth/self.current_price()]
         return [0, self.current_action_range_val(), 0, 0]
 
     def __update_last_action_price(self):
-        self.last_action_price = [max(0, self.prices[self.price_index] - 1 - self.current_action_range_val()),
-                                  self.prices[self.price_index] + 1 + self.current_action_range_val()]
+        self.last_action_price = [max(0, self.prices[self.price_index] - self.current_action_range_val()),
+                                  self.prices[self.price_index] + self.current_action_range_val()]
 
     def current_action_range_val(self):
         return PriceEnv.RANGES[self.current_action_range]
@@ -129,7 +132,7 @@ class PriceEnv(gym.Env):
         return self.prices[self.price_index]
 
     def reset_status_and_price(self, price, il, range_val, last_action_price, investment):
-        self.prices = [int(price)]
+        self.prices = [1/price]
         self.price_index = 0
         self.intial_price = self.price_index
         self.current_action_range = PriceEnv.RANGES.index(range_val)
@@ -139,10 +142,11 @@ class PriceEnv(gym.Env):
         return [0, self.current_action_range_val(), 0, 0]
 
     def add_price(self, price):
-        self.prices.append(int(price))
+        self.prices.append(1/price)
 
     def current_action_range_converted(self):
-        return self.current_action_range_val()
+        return 1/10 - 1/self.current_action_range_val() # TODO: don't how else to do this
+
 
 def prepare_bounds_for_env(data):
     lower_base = min(data["baseLower"], data["baseUpper"])

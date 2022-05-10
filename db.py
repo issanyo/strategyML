@@ -9,14 +9,14 @@ import os
 
 from vault import calculate_tvl
 
-INVESTMENT = [100, 0.035]
+INVESTMENT = {"0x1B94C4EC191Cc4D795Cd0f0929C59cA733b6E636": [100, 0.035]}
 
 def get_db():
     client = MongoClient()
     return client.uniswap
 
 
-def insert_data(vault_data, env: PriceEnv, action: int, future_action: int, new_state, reward_env, collectFees, gas_used, network, tokens):
+def insert_data(vault, vault_data, env: PriceEnv, action: int, future_action: int, new_state, reward_env, collectFees, gas_used, network, tokens):
     db = get_db()
     data = {
         "vault": {
@@ -43,13 +43,14 @@ def insert_data(vault_data, env: PriceEnv, action: int, future_action: int, new_
             "state": new_state
         },
         "network": network,
-        "datetime": datetime.utcnow()
+        "datetime": datetime.utcnow(),
+        "vault_address": vault
     }
     strategy_ = db["strategy"]
     result = strategy_.insert_one(data)
 
     strategy_temp_data = db["strategy_config"]
-    strategy_temp_data.update_one({"name": "future_action"},
+    strategy_temp_data.update_one({"name": "future_action", "vault": vault},
                                   {"$set": {"value": future_action, "name": "future_action", "datetime": datetime.utcnow()}},
                                   upsert=True)
 
@@ -64,7 +65,8 @@ def insert_data(vault_data, env: PriceEnv, action: int, future_action: int, new_
         "tvl": vault_data['tvl'],
         "gas_used": gas_used,
         "datetime": data["datetime"],
-        "tvl_holding": INVESTMENT[0] + INVESTMENT[1] * vault_data['price']
+        "tvl_holding": INVESTMENT[vault][0] + INVESTMENT[vault][1] * vault_data['price'],
+        "vault_address": vault
     }
     if len(collectFees) > 0:
         postgress_data["collectFeesBase"] = calculate_tvl(collectFees[0]["feesToVault0"], collectFees[0]["feesToVault1"], vault_data['price'], tokens)
@@ -77,29 +79,29 @@ def insert_data(vault_data, env: PriceEnv, action: int, future_action: int, new_
     return result
 
 
-def get_state(lookback, env: PriceEnv):
+def get_state(vault, lookback, env: PriceEnv):
     from_date = datetime.utcnow() - timedelta(hours=lookback*2)
 
     db = get_db()
     state = []
     counter = 0
-    for data in db["strategy"].find({'datetime': {"$gte": from_date}}).sort('datetime', 1):
+    for data in db["strategy"].find({'vault_address': vault, 'datetime': {"$gte": from_date}}).sort('datetime', 1):
         if counter > 0:
-            env.add_price(int(data["vault"]["price"]))
+            env.add_price(data["vault"]["price"])
             curr_state, reward, done, _ = env.step(data["env"]["action"])
             state.append(curr_state)
 
-        env.reset_status_and_price(int(data["vault"]["price"]), [data["vault"]["token0_quantity"], data["vault"]["token1_quantity"]], data["env"]["range"], prepare_bounds_for_env(data["vault"]), INVESTMENT)
+        env.reset_status_and_price(data["vault"]["price"], [data["vault"]["token0_quantity"], data["vault"]["token1_quantity"]], data["env"]["range"], prepare_bounds_for_env(data["vault"]), INVESTMENT[vault])
 
         counter += 1
 
     return state[-lookback:]
 
 
-def get_config(name):
+def get_config(name, vault):
     db = get_db()
     strategy_temp_data = db["strategy_config"]
-    config = strategy_temp_data.find_one({"name": name})
+    config = strategy_temp_data.find_one({"name": name, "vault": vault})
     return config["value"] if config else None
 
 

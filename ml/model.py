@@ -6,8 +6,11 @@ options = tf.data.Options()
 options.experimental_distribute.auto_shard_policy = tf.data.experimental.AutoShardPolicy.OFF #AutoShardPolicy.DATA
 LOOKBACK = 6
 
-def load_model():
-    return tf.keras.models.load_model('./ml/dataset_update_agent_pooling_x2')
+def load_model(vault_address):
+    if vault_address == "0x1B94C4EC191Cc4D795Cd0f0929C59cA733b6E636": # ETH/USDC
+        return tf.keras.models.load_model('./ml/dataset_update_agent_pooling_x2')
+
+    return tf.keras.models.load_model('./ml/btc_inverted_x3_full')
 
 def predict(model, state):
     state = tf.data.Dataset.from_tensors(state)
