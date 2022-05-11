@@ -9,7 +9,8 @@ import os
 
 from vault import calculate_tvl
 
-INVESTMENT = {"0x1B94C4EC191Cc4D795Cd0f0929C59cA733b6E636": [100, 0.035]}
+INVESTMENT = {"0x1B94C4EC191Cc4D795Cd0f0929C59cA733b6E636": [100, 0.035],
+              "0x11631E3B97Ea45189985ae45FFC9FD49621776b1": [0.0016e8, 0.02e18]}
 
 def get_db():
     client = MongoClient()
