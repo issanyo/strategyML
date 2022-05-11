@@ -44,7 +44,7 @@ def main(vault_address, strategy_address, network_, legacy_gas):
         print("current range:", env.current_action_range_val(), "converted:", env.current_action_range_converted())
         base = calculate_tick_for_range(env.current_action_range_converted(), strategy, tokens)
         limit = calculate_tick_for_range(env.current_action_range_converted(), strategy, tokens)
-        swapAmount, sqrtPriceLimitX96 = calculate_amounts_to_rebalance(curr_vault_data, tokens)
+        swapAmount, sqrtPriceLimitX96 = calculate_amounts_to_rebalance(vault_address, curr_vault_data, tokens)
 
         tx = rebalance(strategy, base, limit, swapAmount, sqrtPriceLimitX96, os.environ['STRATEGY_PK'], legacy_gas)
 
