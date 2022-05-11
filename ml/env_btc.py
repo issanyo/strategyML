@@ -145,7 +145,7 @@ class PriceEnv(gym.Env):
         self.prices.append(1/price)
 
     def current_action_range_converted(self):
-        return 1/10 - 1/self.current_action_range_val() # TODO: don't how else to do this
+        return 1/10 - 1/(self.current_action_range_val()+10) # TODO: don't how else to do this
 
 
 def prepare_bounds_for_env(data):
