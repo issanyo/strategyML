@@ -21,13 +21,13 @@ def rebalance(strategy, base, limit, swapAmount, sqrtPriceLimitX96, pk, legacy_g
     return strategy.rebalance(base, limit, swapAmount, sqrtPriceLimitX96, {'from': deployer})
 
 
-def calculate_amounts_to_rebalance(vault_data, tokens):
+def calculate_amounts_to_rebalance(vault, vault_data, tokens):
     half_tvl = vault_data['tvl'] / 2  # 200 -> 100
 
     # if 75% of funds are already balanced, do not perform swaps
     TOKEN0_THRESHOLD = half_tvl * 0.25
     TOKEN1_THRESHOLD = half_tvl * 0.25 / vault_data['price']
-    SLIPPAGE = 5
+    SLIPPAGE = 5 if vault == "0x1B94C4EC191Cc4D795Cd0f0929C59cA733b6E636" else 0.0002
 
     token0q = vault_data['total0'] - half_tvl
     token1q = vault_data['total1'] - half_tvl / vault_data['price']
