@@ -3,7 +3,7 @@ import math
 from pymongo import MongoClient
 from datetime import timedelta, datetime
 import psycopg2
-from ml.env import PriceEnv, prepare_bounds_for_env
+from ml.env import PriceEnv
 from psycopg2.extensions import AsIs
 import os
 
