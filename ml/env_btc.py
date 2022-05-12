@@ -162,4 +162,4 @@ class PriceEnv(gym.Env):
         lower_bound = min(lower_base, lower_limit)
         upper_bound = max(upper_base, upper_limit)
 
-        return [lower_bound, upper_bound]
+        return [1/lower_bound, 1/upper_bound]
