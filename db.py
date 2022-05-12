@@ -92,7 +92,7 @@ def get_state(vault, lookback, env: PriceEnv):
             curr_state, reward, done, _ = env.step(data["env"]["action"])
             state.append(curr_state)
 
-        env.reset_status_and_price(data["vault"]["price"], [data["vault"]["token0_quantity"], data["vault"]["token1_quantity"]], data["env"]["range"], prepare_bounds_for_env(data["vault"]), INVESTMENT[vault])
+        env.reset_status_and_price(data["vault"]["price"], [data["vault"]["token0_quantity"], data["vault"]["token1_quantity"]], data["env"]["range"], env.prepare_bounds_for_env(data["vault"]), INVESTMENT[vault])
 
         counter += 1
 

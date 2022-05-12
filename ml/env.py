@@ -144,19 +144,19 @@ class PriceEnv(gym.Env):
     def current_action_range_converted(self):
         return self.current_action_range_val()
 
-def prepare_bounds_for_env(data):
-    lower_base = min(data["baseLower"], data["baseUpper"])
-    upper_base = max(data["baseLower"], data["baseUpper"])
+    def prepare_bounds_for_env(self, data):
+        lower_base = min(data["baseLower"], data["baseUpper"])
+        upper_base = max(data["baseLower"], data["baseUpper"])
 
-    lower_limit = min(data["limitLower"], data["limitUpper"])
-    upper_limit = max(data["limitLower"], data["limitUpper"])
+        lower_limit = min(data["limitLower"], data["limitUpper"])
+        upper_limit = max(data["limitLower"], data["limitUpper"])
 
-    #if data["token0_quantity"] <= 0.01 or data["token1_quantity"] <= 1e-10:
-    #    # use limit because we are unbalanced
-    #    lower_bound = data["limitLower"]
-    #    upper_bound = data["limitUpper"]
+        #if data["token0_quantity"] <= 0.01 or data["token1_quantity"] <= 1e-10:
+        #    # use limit because we are unbalanced
+        #    lower_bound = data["limitLower"]
+        #    upper_bound = data["limitUpper"]
 
-    lower_bound = min(lower_base, lower_limit)
-    upper_bound = max(upper_base, upper_limit)
+        lower_bound = min(lower_base, lower_limit)
+        upper_bound = max(upper_base, upper_limit)
 
-    return [math.floor(lower_bound), math.ceil(upper_bound)]
+        return [math.floor(lower_bound), math.ceil(upper_bound)]
