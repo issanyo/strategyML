@@ -138,7 +138,9 @@ class PriceEnv(gym.Env):
         self.current_action_range = PriceEnv.RANGES.index(range_val)
         self.last_action_price = last_action_price
         self.il = il
-        self.investment = investment
+        # we are given investment=[BTC, ETH]
+        # invert it because we use inverted price, so we express things in ETH
+        self.investment = [investment[1], investment[0]]
         return [0, self.current_action_range_val(), 0, 0]
 
     def add_price(self, price):
