@@ -3,7 +3,7 @@ import os
 from db import insert_data, get_state, get_config
 from ml.env import PriceEnv
 from ml.env_btc import PriceEnv as PriceEnvBTC
-from ml.model import load_model, LOOKBACK, predict
+from ml.model import load_model, predict
 from vault import get_vault_data, get_vault, get_strategy, get_tokens, get_tick_price, calculate_tick_for_range
 from strategy import rebalance, calculate_amounts_to_rebalance
 from brownie import network
@@ -13,7 +13,7 @@ import numpy as np
 def main(vault_address, strategy_address, network_, legacy_gas):
     network.connect(network_)
 
-    model = load_model(vault_address)
+    model, lookback = load_model(vault_address)
     vault = get_vault(vault_address)
     strategy = get_strategy(strategy_address)
     tokens = get_tokens(vault)
@@ -22,7 +22,7 @@ def main(vault_address, strategy_address, network_, legacy_gas):
 
     env = PriceEnv([1]) if vault_address == "0x1B94C4EC191Cc4D795Cd0f0929C59cA733b6E636" else PriceEnvBTC([1])
     env.seed(0)
-    state = get_state(vault_address, LOOKBACK-1, env)
+    state = get_state(vault_address, lookback-1, env)
 
     # Update environment with latest data
     tick, price = get_tick_price(strategy, tokens)
@@ -33,7 +33,7 @@ def main(vault_address, strategy_address, network_, legacy_gas):
 
     print("state:", state)
     predicted_action = 0
-    if len(state) == LOOKBACK:
+    if len(state) == lookback:
         predicted_action = predict(model, state)
         if isinstance(predicted_action, np.generic):
             predicted_action = predicted_action.item()
