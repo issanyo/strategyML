@@ -146,7 +146,7 @@ class PriceEnv(gym.Env):
         self.prices.append(1/int(price))
 
     def current_action_range_converted(self):
-        return 1/10 - 1/(self.current_action_range_val()+10) # TODO: don't how else to do this
+        return abs(self.last_action_price[0] - self.last_action_price[1])/2
 
     def prepare_bounds_for_env(self, data):
         lower_base = min(data["baseLower"], data["baseUpper"])
@@ -163,4 +163,4 @@ class PriceEnv(gym.Env):
         lower_bound = min(lower_base, lower_limit)
         upper_bound = max(upper_base, upper_limit)
 
-        return [1/lower_bound, 1/upper_bound]
+        return [min(1/lower_bound, 1/upper_bound), max(1/lower_bound, 1/upper_bound)]
