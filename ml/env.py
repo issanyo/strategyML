@@ -131,7 +131,7 @@ class PriceEnv(gym.Env):
         return self.prices[self.price_index]
 
     def reset_status_and_price(self, price, il, range_val, last_action_price, investment):
-        self.prices = [1/price]
+        self.prices = [1/int(price)]
         self.price_index = 0
         self.intial_price = self.price_index
         self.current_action_range = PriceEnv.RANGES.index(range_val)
