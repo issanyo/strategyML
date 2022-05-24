@@ -17,7 +17,7 @@ def get_db():
     return client.uniswap
 
 
-def insert_data(vault, vault_data, env: PriceEnv, action: int, future_action: int, new_state, reward_env, collectFees, gas_used, network, tokens):
+def insert_data(vault, vault_data, range: int, action: int, future_action: int, new_state, reward_env, collectFees, gas_used, network, tokens):
     db = get_db()
     data = {
         "vault": {
@@ -38,7 +38,7 @@ def insert_data(vault, vault_data, env: PriceEnv, action: int, future_action: in
             "total1_base": vault_data['total1_base'],
         },
         "env": {
-            "range": env.current_action_range_val(),
+            "range": range,
             "action": action,
             "reward": reward_env,
             "state": new_state
@@ -91,7 +91,9 @@ def get_state(vault, lookback, env: PriceEnv):
             env.add_price(data["vault"]["price"])
             curr_state, reward, done, _ = env.step(data["env"]["action"])
             state.append(curr_state)
+            #print("[get_state] action:", data["env"]["action"], "state:", curr_state)
 
+        #print("[get_state] mongo data:", data)
         env.reset_status_and_price(data["vault"]["price"], [data["vault"]["token0_quantity"], data["vault"]["token1_quantity"]], data["env"]["range"], env.prepare_bounds_for_env(data["vault"]), INVESTMENT[vault])
 
         counter += 1

@@ -64,9 +64,10 @@ class PriceEnv(gym.Env):
 
         if self.current_action_range > 0 and given_range > 0:
             # In range price
+            #print("[In range price] current_action_range", self.current_action_range, "given_range: ", given_range)
             if lower_bound <= new_price <= upper_bound:
                 reward += 0.025/ given_range
-
+                #print("reward:", reward)
                 # IL
                 # [10,0] p=6 -> 40% token1, 60% token0
 
@@ -141,6 +142,9 @@ class PriceEnv(gym.Env):
         # we are given investment=[BTC, ETH]
         # invert it because we use inverted price, so we express things in ETH
         self.investment = [investment[1], investment[0]]
+        #print("[reset_status_and_price] given range_val:", range_val, "current_action_range:", self.current_action_range)
+        #print("[reset_status_and_price] given, price:", price, "il:", il, "last_action_price:", last_action_price,"investment:", investment)
+        #print("[reset_status_and_price] convr, price:", 1 / price, "il:", il, "last_action_price:", self.last_action_price, "investment:", self.investment)
         return [0, self.current_action_range_val(), 0, 0]
 
     def add_price(self, price):
@@ -164,4 +168,5 @@ class PriceEnv(gym.Env):
         lower_bound = min(lower_base, lower_limit)
         upper_bound = max(upper_base, upper_limit)
 
+        #print("[prepare_bounds_for_env]: ", min(1 / lower_bound, 1 / upper_bound), max(1 / lower_bound, 1 / upper_bound))
         return [min(1/lower_bound, 1/upper_bound), max(1/lower_bound, 1/upper_bound)]

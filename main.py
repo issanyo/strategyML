@@ -28,6 +28,7 @@ def main(vault_address, strategy_address, network_, legacy_gas):
     tick, price = get_tick_price(strategy, tokens)
     env.add_price(price)
 
+    env_range = env.current_action_range_val()
     new_state, reward, done, _ = env.step(last_predicted_action)
     state.append(new_state)
 
@@ -44,6 +45,7 @@ def main(vault_address, strategy_address, network_, legacy_gas):
         # step to update the range
         env.add_price(price)
         env.step(predicted_action)
+        env_range = env.current_action_range_val()
 
         print("current range:", env.current_action_range_val(), "converted:", env.current_action_range_converted())
         base = calculate_tick_for_range(env.current_action_range_converted(), strategy, tokens)
@@ -64,6 +66,6 @@ def main(vault_address, strategy_address, network_, legacy_gas):
 
     vault_data = get_vault_data(vault, strategy, tokens)
 
-    insert_data(vault_address, vault_data, env, last_predicted_action, predicted_action, new_state, reward, collectFees, gas_used, network_, tokens)
+    insert_data(vault_address, vault_data, env_range, last_predicted_action, predicted_action, new_state, reward, collectFees, gas_used, network_, tokens)
 
     network.disconnect()
