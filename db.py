@@ -17,7 +17,7 @@ def get_db():
     return client.uniswap
 
 
-def insert_data(vault, vault_data, range: int, action: int, future_action: int, new_state, reward_env, collectFees, gas_used, network, tokens):
+def insert_data(vault, vault_data, range: int, action: int, new_state, reward_env, collectFees, gas_used, network, tokens):
     db = get_db()
     data = {
         "vault": {
@@ -49,11 +49,6 @@ def insert_data(vault, vault_data, range: int, action: int, future_action: int, 
     }
     strategy_ = db["strategy"]
     result = strategy_.insert_one(data)
-
-    strategy_temp_data = db["strategy_config"]
-    strategy_temp_data.update_one({"name": "future_action", "vault": vault},
-                                  {"$set": {"value": future_action, "name": "future_action", "datetime": datetime.utcnow()}},
-                                  upsert=True)
 
     postgress_data = {
         "token0_quantity": vault_data['total0'],
