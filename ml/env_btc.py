@@ -66,7 +66,7 @@ class PriceEnv(gym.Env):
             # In range price
             #print("[In range price] current_action_range", self.current_action_range, "given_range: ", given_range)
             if lower_bound <= new_price <= upper_bound:
-                reward += 0.025/ given_range
+                reward += 0.025/ (self.current_action_range_val()*2)
                 #print("reward:", reward)
                 # IL
                 # [10,0] p=6 -> 40% token1, 60% token0
