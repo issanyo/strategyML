@@ -11,7 +11,7 @@ def load_model(vault_address):
         return (tf.keras.models.load_model('./ml/inverted_lookback_6_64x64_inverted_x2_kl0001_clip025'), lookback)
 
     lookback = 12
-    return (tf.keras.models.load_model('./ml/btc_inverted_x2_lookback_12_full'), lookback)
+    return (tf.keras.models.load_model('./ml/btc_inverted_fix_il_diff_lookback_12_max'), lookback)
 
 def predict(model, state):
     state = tf.data.Dataset.from_tensors(state)

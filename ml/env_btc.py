@@ -96,7 +96,7 @@ class PriceEnv(gym.Env):
         new_investment_price = self.investment[0] + self.investment[1] * new_price
         old_investment_price = self.investment[0] + self.investment[1] * old_price
         hold_il_difference = (new_investment_price - old_investment_price)
-        il_difference = (pool_il_difference - hold_il_difference) * 0.01
+        il_difference = (hold_il_difference - pool_il_difference) * 0.01
 
         info = {}
         return [price_difference, self.current_action_range_val(), il_difference, reward - fees], il_difference + reward - fees, done, info
