@@ -19,7 +19,7 @@ class PriceEnv(gym.Env):
         """
         self.price_index = None
         self.action_space = gym.spaces.Discrete(4)
-        self.observation_space = gym.spaces.Box(low=np.array([-1000., 10, 0, 0]), high=np.array([1000., 900, 10000, 1]))
+        self.observation_space = gym.spaces.Box(low=np.array([-1000., 0, 0]), high=np.array([1000., 10000, 1]))
         self.prices = prices
         # need to call reset or seed
 
@@ -66,7 +66,7 @@ class PriceEnv(gym.Env):
             # In range price
             #print("[In range price] current_action_range", self.current_action_range, "given_range: ", given_range)
             if lower_bound <= new_price <= upper_bound:
-                reward += 0.025/ (self.current_action_range_val()*2)
+                reward += 0.025/ given_range
                 #print("reward:", reward)
                 # IL
                 # [10,0] p=6 -> 40% token1, 60% token0
@@ -99,7 +99,7 @@ class PriceEnv(gym.Env):
         il_difference = (hold_il_difference - pool_il_difference) * 0.01
 
         info = {}
-        return [price_difference, self.current_action_range_val(), il_difference, reward - fees], il_difference + reward - fees, done, info
+        return [price_difference, il_difference, reward], il_difference + reward - fees, done, info
 
     def reset(self):
         self.price_index = len(self.prices) - 10000
@@ -110,7 +110,7 @@ class PriceEnv(gym.Env):
         eth = 1
         self.il = [eth, eth/self.current_price()]
         self.investment = [eth, eth/self.current_price()]
-        return [0, self.current_action_range_val(), 0, 0]
+        return [0, 0, 0]
 
     def seed(self, seed):
         self.price_index = seed
@@ -120,7 +120,7 @@ class PriceEnv(gym.Env):
         eth = 1
         self.il = [eth, eth/self.current_price()]
         self.investment = [eth, eth/self.current_price()]
-        return [0, self.current_action_range_val(), 0, 0]
+        return [0, 0, 0]
 
     def __update_last_action_price(self):
         self.last_action_price = [max(0, self.prices[self.price_index] - self.current_action_range_val()),
@@ -145,7 +145,7 @@ class PriceEnv(gym.Env):
         #print("[reset_status_and_price] given range_val:", range_val, "current_action_range:", self.current_action_range)
         #print("[reset_status_and_price] given, price:", price, "il:", il, "last_action_price:", last_action_price,"investment:", investment)
         #print("[reset_status_and_price] convr, price:", 1 / price, "il:", il, "last_action_price:", self.last_action_price, "investment:", self.investment)
-        return [0, self.current_action_range_val(), 0, 0]
+        return [0, 0, 0]
 
     def add_price(self, price):
         self.prices.append(1/price)
