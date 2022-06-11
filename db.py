@@ -84,7 +84,7 @@ def get_state(vault, lookback, env: PriceEnv):
     for data in db["strategy"].find({'vault_address': vault, 'datetime': {"$gte": from_date}}).sort('datetime', 1):
         if counter > 0:
             env.add_price(data["vault"]["price"])
-            curr_state, reward, done, _ = env.step(data["env"]["action"])
+            curr_state, reward, done, _ = env.step(data["env"]["action"], env.prepare_bounds_for_env(data["vault"]))
             state.append(curr_state)
             #print("[get_state] action:", data["env"]["action"], "state:", curr_state)
 

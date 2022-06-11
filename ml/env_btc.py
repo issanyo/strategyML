@@ -28,7 +28,7 @@ class PriceEnv(gym.Env):
         self.il[0] = assets * percentage_token0
         self.il[1] = assets * (1 - percentage_token0) / price
 
-    def step(self, action):
+    def step(self, action, last_action_price=None):
 
         reward = 0
         fees = 0
@@ -44,7 +44,10 @@ class PriceEnv(gym.Env):
             if action == 2:  # decrement
                 self.current_action_range = max(self.current_action_range - 1, 0)
 
-            self.__update_last_action_price()
+            if last_action_price:
+                self.last_action_price = last_action_price
+            else:
+                self.__update_last_action_price()
 
             # IL rebalance
             assets = self.il[0] + self.il[1] * self.current_price()
@@ -96,7 +99,7 @@ class PriceEnv(gym.Env):
         new_investment_price = self.investment[0] + self.investment[1] * new_price
         old_investment_price = self.investment[0] + self.investment[1] * old_price
         hold_il_difference = (new_investment_price - old_investment_price)
-        il_difference = (hold_il_difference - pool_il_difference) * 0.01
+        il_difference = (hold_il_difference - pool_il_difference) * 0.05
 
         info = {}
         return [price_difference, il_difference, reward], il_difference + reward - fees, done, info
