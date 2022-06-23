@@ -99,10 +99,10 @@ class PriceEnv(gym.Env):
         new_investment_price = self.investment[0] + self.investment[1] * new_price
         old_investment_price = self.investment[0] + self.investment[1] * old_price
         hold_il_difference = (new_investment_price - old_investment_price)
-        il_difference = (hold_il_difference - pool_il_difference) * 0.05
+        il_difference = (hold_il_difference - pool_il_difference) #* 0.05
 
         info = {}
-        return [price_difference, il_difference, reward], il_difference + reward - fees, done, info
+        return [price_difference, given_range, il_difference, reward, fees], il_difference + reward - fees, done, info
 
     def reset(self):
         self.price_index = len(self.prices) - 10000
