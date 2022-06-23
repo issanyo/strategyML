@@ -51,6 +51,17 @@ class SimpleStrategy:
 
         # mean_reward >= -0.001 # are we paying too much for rebalance?
 
+        print("currently_inside_range", currently_inside_range)
+        print("trend_last_quartile", trend_last_quartile)
+        print("p_reward_last_quartile", p_reward_last_quartile)
+        print("deviation_last_quartile", deviation_last_quartile)
+        print("fees_last_quartile", fees_last_quartile)
+        print("p_reward", p_reward)
+        print("deviation", deviation)
+        print("p_outside_curr_range", p_outside_curr_range)
+        print("p_above_curr_range", p_above_curr_range)
+        print("p_below_curr_range", p_below_curr_range)
+
         # we are outside range and the price is not too volatile
         if fees_last_quartile < 0.1:
 
@@ -58,17 +69,21 @@ class SimpleStrategy:
                     p_above_curr_range * p_below_curr_range > 0.001 or (
                     p_reward_last_quartile > 0.9 and p_outside_curr_range > 0.5)):
                 # increment, outsiders up and down
+                print("SimpleStrategy if#1")
                 action = 1
             elif p_reward > 0.99 and p_reward_last_quartile > 0.99 and deviation < 0.1:
                 # decrement, majourity of values are inside
+                print("SimpleStrategy if#2")
                 action = 2
 
             # check if we are still inside the current range
             elif deviation_last_quartile <= 0.25 and not currently_inside_range and p_reward_last_quartile < 0.5:  # mean > curr_range and
+                print("SimpleStrategy if#3")
                 action = 3
 
             # antecipate rebalance to prevent IL
             elif trend_last_quartile > 0.9:  # and deviation_last_quartile > 1:
+                print("SimpleStrategy if#4")
                 action = 3
 
         a = np.zeros(4)
