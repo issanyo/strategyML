@@ -13,7 +13,7 @@ class SimpleStrategy:
 
         data = list(state.as_numpy_iterator())[0][0]
         # data = state
-        q = len(data) // 5
+        q = len(data) // 4
 
         deviation = data[:, 0].std()
         mean = np.sqrt((data[:, 0] ** 2).mean())
@@ -55,20 +55,18 @@ class SimpleStrategy:
         print("p_below_curr_range", p_below_curr_range)
 
         # we are outside range and the price is not too volatile
-        if fees_last_quartile < 0.08:
-            if not currently_inside_range and (deviation_last_quartile > 0.75 or (0.01 < p_reward < 0.5 and (
-                    p_above_curr_range * p_below_curr_range > 0.0001 or (
-                    p_reward_last_quartile > 0.5 and p_outside_curr_range > 0.8)))):
+        if fees_last_quartile < 0.09:
+            if not currently_inside_range and (deviation_last_quartile > 0.75 or (0.01 < p_reward < 0.45 and (p_above_curr_range * p_below_curr_range > 5e-05 or (p_reward_last_quartile > 0.55 and p_outside_curr_range > 0.75)))):
                 # increment, outsiders up and down
                 print("SimpleStrategy if#1")
                 action = 1
-            elif p_reward > 0.99 and p_reward_last_quartile > 0.99 and deviation < 0.2 and fees < 0.01:
+            elif p_reward > 0.99 and p_reward_last_quartile > 0.99 and deviation < 0.2 and fees < 0.025:
                 # decrement, majourity of values are inside
                 print("SimpleStrategy if#2")
                 action = 2
 
             # check if we are still inside the current range
-            elif deviation_last_quartile <= 1.1 and not currently_inside_range and p_reward_last_quartile < 0.1:  # mean > curr_range and
+            elif deviation_last_quartile <= 1.05 and not currently_inside_range and p_reward_last_quartile < 0.15: #mean > curr_range and
                 print("SimpleStrategy if#3")
                 action = 3
 
