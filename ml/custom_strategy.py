@@ -31,6 +31,7 @@ class SimpleStrategy:
         weight = q * (q + 1) / 2
         weights = np.arange(1, q + 1) / weight
         fees_last_quartile = np.average(data[-q:, 4], weights=weights)
+        last_fee = data[-1, 4]
         fees = np.average(data[:, 4], weights=np.arange(1, len(data) + 1) / (len(data) * (len(data) + 1) / 2))
 
         deviation_last_quartile = data[-q:, 0].std()  # np.abs(data[-1][0] - data[0][0])
@@ -55,7 +56,7 @@ class SimpleStrategy:
         print("p_below_curr_range", p_below_curr_range)
 
         # we are outside range and the price is not too volatile
-        if fees_last_quartile < 0.09:
+        if fees_last_quartile < 0.09 and last_fee == 0:
             if not currently_inside_range and (deviation_last_quartile > 0.75 or (0.01 < p_reward < 0.45 and (p_above_curr_range * p_below_curr_range > 5e-05 or (p_reward_last_quartile > 0.55 and p_outside_curr_range > 0.75)))):
                 # increment, outsiders up and down
                 print("SimpleStrategy if#1")
