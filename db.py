@@ -81,6 +81,7 @@ def get_state(vault, lookback, env: PriceEnv):
     db = get_db()
     state = []
     counter = 0
+    last_action = 0
     for data in db["strategy"].find({'vault_address': vault, 'datetime': {"$gte": from_date}}).sort('datetime', 1):
         if counter > 0:
             env.add_price(data["vault"]["price"])
@@ -90,10 +91,10 @@ def get_state(vault, lookback, env: PriceEnv):
 
         #print("[get_state] mongo data:", data)
         env.reset_status_and_price(data["vault"]["price"], [data["vault"]["token0_quantity"], data["vault"]["token1_quantity"]], data["env"]["range"], env.prepare_bounds_for_env(data["vault"]), INVESTMENT[vault])
-
+        last_action = data["env"]["action"]
         counter += 1
 
-    return state[-lookback:]
+    return state[-lookback:], last_action
 
 
 def get_config(name, vault):

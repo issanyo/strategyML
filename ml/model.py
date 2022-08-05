@@ -10,9 +10,8 @@ def load_model(vault_address):
     if vault_address == "0x1B94C4EC191Cc4D795Cd0f0929C59cA733b6E636": # ETH/USDC
         return (tf.keras.models.load_model('./ml/inverted_lookback_6_64x64_inverted_x2_kl0001_clip025'), lookback)
 
-    lookback = 72
-    simplemodel = SimpleStrategy()
-    return (simplemodel, lookback)
+    lookback = 12
+    return (tf.keras.models.load_model('./ml/btc_inverted_3state_il_diff_0.05_max'), lookback)
 
 def predict(model, state):
     state = tf.data.Dataset.from_tensors(state)

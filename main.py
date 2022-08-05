@@ -22,7 +22,7 @@ def main(vault_address, strategy_address, network_, legacy_gas):
 
     env = PriceEnv([1]) if vault_address == "0x1B94C4EC191Cc4D795Cd0f0929C59cA733b6E636" else PriceEnvBTC([1])
     env.seed(0)
-    state = get_state(vault_address, lookback, env)
+    state, last_action = get_state(vault_address, lookback, env)
 
     # Update environment with latest data
     tick, price = get_tick_price(strategy, tokens)
@@ -30,7 +30,7 @@ def main(vault_address, strategy_address, network_, legacy_gas):
 
     print("state:", state)
     predicted_action = 0
-    if len(state) == lookback:
+    if len(state) == lookback and last_action == 0: # do not perform 2 consecutive actions (to update the state)
         predicted_action = predict(model, state)
         if isinstance(predicted_action, np.generic):
             predicted_action = predicted_action.item()

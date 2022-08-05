@@ -6,7 +6,7 @@ import gym
 
 class PriceEnv(gym.Env):
     RANGE_FACTOR = 2
-    RANGES = [0, 0.025, 0.05, 0.075, 0.1, 0.15, 0.2,0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8]
+    RANGES = [0, 0.025, 0.05, 0.075, 0.1, 0.15, 0.2, 0.3, 0.4, 0.6, 0.8]
     POOL_FEE = 0.05 / 100
 
     def __init__(self, prices):
@@ -99,10 +99,10 @@ class PriceEnv(gym.Env):
         new_investment_price = self.investment[0] + self.investment[1] * new_price
         old_investment_price = self.investment[0] + self.investment[1] * old_price
         hold_il_difference = (new_investment_price - old_investment_price)
-        il_difference = (hold_il_difference - pool_il_difference) #* 0.05
+        il_difference = (hold_il_difference - pool_il_difference) * 0.05
 
         info = {}
-        return [price_difference, given_range, il_difference, reward, fees], il_difference + reward - fees, done, info
+        return [price_difference, il_difference, reward], il_difference + reward - fees, done, info
 
     def reset(self):
         self.price_index = len(self.prices) - 10000
