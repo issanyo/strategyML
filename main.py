@@ -35,12 +35,15 @@ def main(vault_address, strategy_address, network_, legacy_gas):
         if isinstance(predicted_action, np.generic):
             predicted_action = predicted_action.item()
 
+    if env.current_action_range == 1 and predicted_action == 2: # no decrement to zero
+        predicted_action = 3
+
     env.add_price(price) # just to move forward
     new_state, reward, done, _ = env.step(predicted_action)
 
     collectFees = []
     gas_used = 0
-    if predicted_action != 0 and env.current_action_range_val() > 0:
+    if predicted_action != 0:
         print("current range:", env.current_action_range_val(), "converted:", env.current_action_range_converted())
         base = calculate_tick_for_range(env.current_action_range_converted(), strategy, tokens)
         limit = calculate_tick_for_range(env.current_action_range_converted(), strategy, tokens)
