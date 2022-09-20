@@ -41,12 +41,15 @@ def main(vault_address, strategy_address, network_, legacy_gas):
     env.add_price(price) # just to move forward
     new_state, reward, done, _ = env.step(predicted_action)
 
+    # 0.016
     collectFees = []
     gas_used = 0
-    if predicted_action != 0:
-        print("current range:", env.current_action_range_val(), "converted:", env.current_action_range_converted())
-        base = calculate_tick_for_range(env.current_action_range_converted(), strategy, tokens)
-        limit = calculate_tick_for_range(env.current_action_range_converted(), strategy, tokens)
+    if True: #predicted_action != 0:
+        #new_range = env.current_action_range_converted()
+        new_range = 0.016
+        print("current range:", env.current_action_range_val(), "converted:", new_range)
+        base = calculate_tick_for_range(new_range, strategy, tokens)
+        limit = calculate_tick_for_range(new_range, strategy, tokens)
         swapAmount, sqrtPriceLimitX96 = calculate_amounts_to_rebalance(vault_address, curr_vault_data, tokens)
 
         tx = rebalance(strategy, base, limit, swapAmount, sqrtPriceLimitX96, os.environ['STRATEGY_PK'], legacy_gas)
