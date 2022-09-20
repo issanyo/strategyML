@@ -44,7 +44,7 @@ def main(vault_address, strategy_address, network_, legacy_gas):
     # 0.016
     collectFees = []
     gas_used = 0
-    if True: #predicted_action != 0:
+    if False: #predicted_action != 0:
         #new_range = env.current_action_range_converted()
         new_range = 0.016
         print("current range:", env.current_action_range_val(), "converted:", new_range)
