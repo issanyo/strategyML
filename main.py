@@ -46,7 +46,7 @@ def main(vault_address, strategy_address, network_, legacy_gas):
     gas_used = 0
     if False: #predicted_action != 0:
         #new_range = env.current_action_range_converted()
-        new_range = 0.016
+        new_range = 0.01
         print("current range:", env.current_action_range_val(), "converted:", new_range)
         base = calculate_tick_for_range(new_range, strategy, tokens)
         limit = calculate_tick_for_range(new_range, strategy, tokens)
